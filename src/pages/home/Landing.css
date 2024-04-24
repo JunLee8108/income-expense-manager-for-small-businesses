@@ -1,0 +1,147 @@
+.landing-bg {
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.landing-container {
+  text-align: center;
+  width: 100%;
+  max-width: 600px;
+  background: snow;
+  color: #202020;
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3);
+}
+
+.logo {
+  width: 60%;
+  border-radius: 10px;
+}
+
+.landing-sub-title {
+  color: gray;
+  font-weight: normal;
+  font-size: 1rem;
+}
+
+.landing-sub-title-korean {
+  margin-top: 0;
+  font-size: 0.9rem;
+}
+
+/* Password Input Styles */
+.landing-select-container {
+  margin: 20px 0;
+  margin-bottom: 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+}
+
+.landing-password-new,
+.landing-password-current {
+  width: 40%;
+  padding: 20px 0;
+  border: none;
+  font-size: 1rem;
+  border-radius: 10px;
+  color: white;
+  font-weight: bold;
+  transition: 0.4s all ease;
+  cursor: pointer;
+  color: green;
+  border: 2px solid green;
+  background-color: transparent;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.landing-password-new:hover,
+.landing-password-current:hover {
+  background-color: green;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
+}
+
+.landing-new-container {
+  display: flex;
+  margin: 30px 0;
+  margin-top: 50px;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 1.5rem;
+  z-index: 999;
+}
+
+.landing-new-container form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 1.5rem;
+  z-index: 999;
+}
+
+.landing-new-container form h3 {
+  margin: 0;
+}
+
+.back-btn-container {
+  width: 80%;
+  display: flex;
+}
+
+.landing-new-container input {
+  padding: 15px 18px;
+  font-size: 15px;
+  border-radius: 5px;
+  border: 1px solid black;
+  z-index: 999;
+}
+
+.landing-new-container-start {
+  padding: 15px 18px;
+  width: 100%;
+  color: white;
+  background-color: #212121;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.4s all ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  letter-spacing: 1px;
+}
+
+.back-btn-container button {
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  padding: 0px;
+  background-color: transparent;
+  padding: 8px;
+  border-radius: 10px;
+  transition: 0.4s all ease;
+  cursor: pointer;
+}
+
+.landing-new-container-start:hover {
+  opacity: 0.5;
+}
+
+.back-btn-container button:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.landing-owner {
+  padding: 15px 10px;
+  width: 80%;
+  border-top: 0.5px dotted gray;
+  margin-left: auto;
+  margin-right: auto;
+}

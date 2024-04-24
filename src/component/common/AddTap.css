@@ -1,0 +1,55 @@
+.add-tap,
+.delete-tap {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.add-tap {
+  margin-bottom: 30px;
+}
+
+.add-tap h3,
+.delete-tap h3 {
+  margin: 0;
+}
+
+.add-tap input,
+.delete-tap input {
+  padding: 20px;
+  width: 200px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  border-bottom: 1px solid white;
+  transition: 0.3s all ease;
+  outline: none;
+  color: white;
+  font-size: 15px;
+}
+
+.add-tap input:hover,
+.add-tap input:focus {
+  border: 1px solid orange;
+}
+
+.add-tap button,
+.delete-tap-delete-button {
+  padding: 20px 15px;
+  margin-top: 15px;
+  min-width: 200px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: transparent;
+  color: #d32f2f;
+  font-weight: bold;
+  transition: 0.3s all ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 2);
+}
+
+.add-tap button:hover,
+.delete-tap-delete-button:hover {
+  background-color: black;
+}

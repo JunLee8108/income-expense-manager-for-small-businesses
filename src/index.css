@@ -1,0 +1,85 @@
+@import url("https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap");
+
+body {
+  margin: 0;
+  font-family: "Reddit Mono", monospace;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* background-color: snow;
+  color: #212121; */
+  background-color: #212121;
+  color: white;
+}
+
+* {
+  font-family: "Reddit Mono", monospace;
+}
+
+/* code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+} */
+
+*,
+*::before,
+*::after,
+input,
+div,
+label,
+section {
+  box-sizing: border-box;
+}
+
+.animation {
+  opacity: 0;
+  transform: translateY(20px);
+  animation: slideUp 0.7s 0.2s forwards;
+}
+
+.animation-down {
+  opacity: 0;
+  transform: translateY(-5px);
+  animation: slideDown 0.4s 0s forwards;
+}
+
+.animation-x {
+  opacity: 0;
+  transform: translateY(-15px);
+  animation: slideLeft 0.6s 0.2s forwards;
+}
+
+.flash {
+  opacity: 0;
+  animation: flashAnimation 0.5s 0.1s forwards;
+}
+
+.invisible {
+  display: none !important;
+}
+
+@keyframes flashAnimation {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideLeft {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

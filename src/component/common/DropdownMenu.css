@@ -1,0 +1,105 @@
+.dropdown {
+  position: relative;
+  display: inline-block;
+  /* background-color: red;
+  width: 100%; */
+  scroll-margin-top: 150px;
+}
+
+.dropdown-tap {
+  width: 80%;
+  max-width: 700px;
+}
+
+.dropdown-toggle {
+  padding: 15px;
+  background-color: #f9f9f9;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  min-width: 200px;
+  font-size: 1rem;
+}
+
+.dropdown-tap-toggle {
+  font-size: 1.8rem;
+  background-color: transparent;
+  border: none;
+  color: white;
+  padding: 23px;
+  min-width: 340px;
+  border: none;
+  border-bottom: 0.5px dotted gray;
+  gap: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  font-weight: bold;
+  letter-spacing: 0.5px;
+  min-height: 80px;
+  width: 100%;
+  border-radius: none;
+  transition: 0.3s all ease;
+  /* box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 1); */
+}
+
+.dropdown-tap-toggle:hover,
+.dropdown-tap-toggle:focus {
+  background-color: rgba(0, 0, 0, 0.5);
+  border-bottom: 0.5px dotted rgba(0, 0, 0, 0.5);
+  color: white;
+  box-shadow: 0px 4px 8px 0px rgba(0, 0, 0, 2);
+}
+
+.dropdown-tap-toggle:focus {
+  border-radius: 10px 10px 0 0;
+}
+
+.dropdown-menu {
+  position: absolute;
+  background-color: #f9f9f9;
+  width: 100%;
+  overflow-y: auto;
+  max-height: 250px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  z-index: 99;
+  cursor: pointer;
+  word-wrap: break-word;
+}
+
+.dropdown-tap-menu {
+  /* min-width: 300px; */
+  width: 100%;
+  font-size: 1.1rem;
+  max-height: 350px;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.5);
+  word-wrap: break-word;
+}
+
+.dropdown-item {
+  color: black;
+  padding: 20px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.dropdown-item:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-toggle span {
+  margin-left: 5px;
+}
+
+.arrow-icon {
+  display: inline-block;
+  margin-bottom: -5px;
+  position: absolute;
+  font-size: 20px;
+  right: 20px;
+  transition: transform 0.3s ease; /* 부드러운 변화를 위한 transition 설정 */
+}
+
+.rotate-up {
+  transform: rotate(180deg); /* 위쪽 화살표를 위해 180도 회전 */
+}

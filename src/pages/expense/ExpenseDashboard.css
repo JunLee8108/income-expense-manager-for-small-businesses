@@ -1,0 +1,313 @@
+.dashboard-container {
+  margin-bottom: 30px;
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); */
+  padding: 15px;
+  /* border: 1px dotted white; */
+  border-radius: 10px;
+}
+
+.dashboard-header {
+  /* color: #34495e; */
+  font-size: 2.1rem; /* Larger font size */
+  /* background-color: red; */
+  padding: 15px;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  text-align: center;
+  text-decoration: underline white 1px;
+  text-underline-offset: 1rem;
+}
+
+.dashboard-month-name {
+  text-align: center;
+  font-size: 1.6rem;
+  margin-top: 0;
+  margin-bottom: 10px;
+  /* margin-bottom: 40px; */
+  font-weight: normal;
+}
+
+.dashboard-month-name-korean {
+  margin-bottom: 40px;
+  text-align: center;
+  font-size: 1.4rem;
+  margin-top: 0;
+  margin-bottom: 40px;
+  font-weight: normal;
+}
+
+.dashboard-top-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-gap: 1rem 1rem;
+  margin-bottom: 50px;
+}
+
+@media (min-width: 1280px) {
+  .dashboard-top-container {
+    grid-template-columns: repeat(
+      4,
+      1fr
+    ); /* 화면이 1280px 이상일 때 4열로 표시 */
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1279px) {
+  .dashboard-top-container {
+    grid-template-columns: repeat(
+      4,
+      1fr
+    ); /* 화면이 768px 이상 1279px 이하일 때 2열로 표시 */
+  }
+}
+
+.dashboard-top-content {
+  border-radius: 10px;
+  width: 100%;
+  height: 150px;
+  background-color: transparent;
+  /* color: #202020; */
+  color: white;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.dashboard-top-content h3 {
+  font-weight: normal;
+  margin-top: 0;
+}
+
+.dashboard-top-content:nth-child(1) h2 {
+  color: #6c8dfa;
+}
+
+.dashboard-top-content:nth-child(2) h2 {
+  color: #ff6961;
+}
+
+.dashboard-top-content:nth-child(3) h2 {
+  color: #46c34c;
+}
+
+.dashboard-total-expense,
+.dashboard-total-expense-month {
+  width: 100%;
+  box-sizing: border-box;
+  color: white; /* White text for contrast */
+  padding: 15px; /* Spacing inside the card */
+  padding-top: 20px;
+  /* border-radius: 8px; */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+  text-align: center; /* Center the text */
+  font-size: 1.2em; /* Slightly larger font */
+  margin: 20px auto; /* Centering and spacing outside the card */
+  display: block;
+}
+
+.dashboard-total-expense {
+  /* background-color: #2ecc71; */
+  background: linear-gradient(to top, #0ba360 0%, #3cba92 100%);
+}
+
+.dashboard-total-expense-month {
+  /* background-color: #2d7f9d; */
+  background: linear-gradient(
+    69.8deg,
+    rgb(25, 49, 108) 2.8%,
+    rgb(1, 179, 201) 97.8%
+  );
+}
+
+.dashboard-total-expense-korean {
+  font-size: 14px;
+}
+
+.dashboard-total,
+.dashoboard-total-month {
+  font-size: 1.8rem;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  display: block;
+}
+
+.dashoboard-total-month {
+  margin-bottom: 20px;
+}
+
+.dashobarod-month-items {
+  font-size: 1.1rem;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  display: block;
+  color: #f5f5f5;
+}
+
+.dashboard-chart-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+  place-items: center;
+  grid-gap: 2rem 2rem;
+  /* background-color: red; */
+  box-sizing: border-box;
+  margin-top: 10px;
+  /* padding-top: 30px; */
+  /* padding-bottom: 30px; */
+}
+
+.dashboard-bar-container,
+.dashboard-line-container {
+  /* background-color: snow; */
+  background-color: transparent;
+  color: white;
+  color: #202020;
+  padding: 20px;
+  /* padding-top: 40px; */
+  box-sizing: border-box;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
+  /* box-shadow: 0px 4px 8px rgba(58, 219, 35, 0.2); */
+  border-radius: 10px;
+  width: 100%;
+  transition: 0.4s all ease;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.dashboard-bar-container:hover,
+.dashboard-line-container:hover {
+  /* transform: scale(1.02); */
+  border: 2px solid gray;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 1);
+}
+
+.dashboard-chart-header,
+.dashboard-chart-subheader {
+  text-align: center;
+  margin-top: 10px;
+  color: white;
+  font-weight: normal;
+}
+
+.dashboard-chart-header {
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  /* color: black; */
+}
+
+.dashboard-chart-subheader {
+  margin-bottom: 30px;
+  /* font-weight: normal; */
+}
+
+.dashboard-chart-exception {
+  text-align: center;
+  color: gray;
+  font-size: 0.8rem;
+  font-weight: 550;
+  margin-bottom: 30px;
+}
+
+.dashboard-chart-no-data-header {
+  text-align: center;
+}
+
+.chart-modal-bg {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 5;
+}
+
+.chart-modal-container {
+  background-color: white;
+  /* padding: 50px; */
+  width: 80%;
+  border-radius: 5px;
+  z-index: 10;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.chart-modal-graph-container {
+  background-color: #fff; /* White background */
+  padding: 20px;
+  box-sizing: border-box;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Shadow for depth */
+  border-radius: 10px; /* Rounded corners */
+  width: 100%;
+}
+
+.chart-modal-btn-container {
+  width: 99%;
+  box-sizing: border-box;
+  text-align: right;
+  padding-top: 10px;
+}
+
+.chart-modal-close-btn {
+  padding: 10px 13px;
+  border: none;
+  border-radius: 50%;
+  background-color: brown;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s all ease;
+}
+
+.chart-modal-close-btn:hover {
+  background-color: red;
+}
+
+.dashboard-expensive-table {
+  width: 100%;
+  table-layout: fixed;
+  box-sizing: border-box;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  margin-bottom: 30px;
+  border-top: 1px solid #444444;
+  border-collapse: collapse;
+}
+
+.dashboard-expensive-table th,
+.dashboard-expensive-table td {
+  text-align: center;
+  padding: 15px;
+  border-bottom: 1px dotted #444444;
+}
+
+.dashboard-expensive-table th {
+  background-color: #363636;
+  color: white;
+}
+
+.dashboard-expensive-table th:nth-child(1) {
+  border-radius: 5px 0 0 0;
+}
+
+.dashboard-expensive-table th:nth-last-child(1) {
+  border-radius: 0 5px 0 0;
+}
+
+.dashboard-expensive-table th:nth-child(1),
+.dashboard-expensive-table td:nth-child(1) {
+  border-left: none;
+}
+
+.dashboard-expensive-table th:nth-child(1),
+.dashboard-expensive-table th:nth-child(2),
+.dashboard-expensive-table th:nth-child(3),
+.dashboard-expensive-table th:nth-child(4),
+.dashboard-expensive-table th:nth-child(5),
+.dashboard-expensive-table th:nth-child(6) {
+  border-top: 1px transparent solid;
+}
