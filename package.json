@@ -1,5 +1,6 @@
 {
-  "name": "expense-manager",
+  "name": "money-insight",
+  "productName": "Money Insight",
   "version": "0.2.0",
   "private": true,
   "dependencies": {
@@ -25,7 +26,9 @@
     "web-vitals": "^2.1.4",
     "xlsx": "^0.18.5"
   },
-  "main": "electron-starter.js",
+  "main": "public/electron.js",
+  "author": "Jeong Hyun Lee lejhn1@gmail.com",
+  "description": "Income and Expense Manager for small business",
   "scripts": {
     "build": "react-scripts build",
     "pack": "electron-builder --dir",
@@ -38,16 +41,15 @@
   "build": {
     "appId": "com.example.expensemanager",
     "files": [
-      "electron-starter.js"
+      "build/**/*"
     ],
-    "extraMetadata": {
-      "main": "electron-starter.js"
-    },
     "mac": {
-      "category": "public.app-category.finance"
+      "category": "public.app-category.finance",
+      "icon": "public/logo.icns"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "public/logo.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -55,9 +57,9 @@
       "createDesktopShortcut": true,
       "perMachine": true,
       "language": 1042,
-      "shortcutName": "EM",
-      "artifactName": "EM-${version}.${ext}",
-      "uninstallDisplayName": "EM"
+      "shortcutName": "Money Insight",
+      "artifactName": "Money Insight-${version}.${ext}",
+      "uninstallDisplayName": "Money Insight Uninstall"
     },
     "linux": {
       "target": [
@@ -93,6 +95,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
     "electron": "^27.1.2",

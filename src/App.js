@@ -53,7 +53,7 @@ function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<ExpenseManager />} />
+        <Route path="/" element={<Landing />} />
         <Route path="/expense" element={<ExpenseManager />} />
         <Route
           path="/income"

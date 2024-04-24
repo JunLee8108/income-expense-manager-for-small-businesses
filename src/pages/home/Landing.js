@@ -74,7 +74,7 @@ export default function Landing() {
             <>
               <div className="logo-container">
                 <img
-                  src="./img/logo.webp"
+                  src="./img/logo2.webp"
                   alt="Hanara Sushi Logo"
                   className="logo"
                 />
