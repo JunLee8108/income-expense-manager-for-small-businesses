@@ -1,14 +1,42 @@
-@import url("https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap"); */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap");
 
 body {
   margin: 0;
-  font-family: "Reddit Mono", monospace;
+  /* font-family: "Reddit Mono", monospace; */
+  font-family: "Inter", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   /* background-color: snow;
   color: #212121; */
   background-color: #212121;
   color: white;
+}
+
+:root {
+  --mint: #55c6aa;
+  --mintHover: #8fcabb;
+}
+
+.display-flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #202020;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: gray;
+  border-radius: 10px;
 }
 
 * {

@@ -24,9 +24,28 @@
   transition: 0.3s all ease;
 }
 
+.modal-input {
+  display: block;
+  margin: auto;
+  margin-bottom: 20px;
+  border-radius: 10px;
+  padding: 15px;
+}
+
 .modal-alert-button {
 }
 
 .modal-button:hover {
   background-color: #007bff;
+}
+
+.caps-lock-warning {
+  font-size: 0.9rem;
+  color: var(--mint);
+  font-weight: bold;
+}
+
+.caps-lock-warning-register {
+  margin-top: -10px;
+  margin-bottom: 10px;
 }

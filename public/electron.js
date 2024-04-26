@@ -5,6 +5,7 @@ const {
   dialog,
   Menu,
   globalShortcut,
+  safeStorage,
 } = require("electron");
 // const { autoUpdater } = require("electron-updater");
 const fs = require("fs");
@@ -198,6 +199,29 @@ app.on("activate", () => {
   }
 });
 
+// Password Encryption and Decryption
+ipcMain.on("encrypt-password", (event, password) => {
+  const encryptedPassword = safeStorage.encryptString(password).toString("hex");
+  event.sender.send("encrypted-password", encryptedPassword);
+});
+
+function decryptPassword(encryptedPasswordHex) {
+  const encryptedPasswordBuffer = Buffer.from(encryptedPasswordHex, "hex");
+  const decryptedPassword = safeStorage.decryptString(encryptedPasswordBuffer);
+  return decryptedPassword;
+}
+
+ipcMain.on("verify-password", (event, { password, encryptedPassword }) => {
+  const decryptedStoredPassword = decryptPassword(encryptedPassword);
+
+  if (password === decryptedStoredPassword) {
+    event.sender.send("password-verification", true);
+  } else {
+    event.sender.send("password-verification", false);
+  }
+});
+
+// Data Encryption
 function encrypt(text) {
   let iv = crypto.randomBytes(16);
   let cipher = crypto.createCipheriv(algorithm, Buffer.from(secretKey), iv);

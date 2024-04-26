@@ -1,9 +1,13 @@
 import "./Landing.css";
 import YesNoModal from "../../component/common/modal/YesNoModal";
 import AlertModal from "../../component/common/modal/AlertModal";
+import InputModal from "../../component/common/modal/InputModal";
+import Loading from "../../component/common/Loading";
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+const { ipcRenderer } = window.require("electron");
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -16,9 +20,17 @@ export default function Landing() {
   const [isAlertModal, setAlertModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
   const [storeName, setStoreName] = useState("");
+  const [encryptedPassword, setEncryptedPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPasswordModal, setPasswordModal] = useState(false);
+  const [capsLockWarning, setCapsLockWarning] = useState(false);
 
   const navigateToExpenseManager = () => {
-    navigate("/expense", { replace: true });
+    setIsLoading(true);
+    setTimeout(() => {
+      setIsLoading(false);
+      navigate("/expense", { replace: true });
+    }, 1000);
   };
 
   const handleSetNewData = (boolean) => () => {
@@ -29,10 +41,15 @@ export default function Landing() {
     e.preventDefault();
 
     const form = new FormData(e.currentTarget);
+
     const storeName = form.get("storeName");
     setStoreName(storeName);
 
-    // const password = form.get("password");
+    const password = form.get("password");
+    ipcRenderer.send("encrypt-password", password);
+    ipcRenderer.once("encrypted-password", (event, encrypted) => {
+      setEncryptedPassword(encrypted);
+    });
 
     setConfirmModal(true);
     setMessage(
@@ -52,9 +69,15 @@ export default function Landing() {
     setMessage(`Store Name(가게 이름):\n${currentStoreName}, Correct?`);
   };
 
+  const handleKeyPress = (e) => {
+    // Caps Lock 감지
+    const isCapsLockOn = e.getModifierState("CapsLock");
+    setCapsLockWarning(isCapsLockOn);
+  };
+
   return (
     <>
-      <div className="landing-bg">
+      <div className="landing-bg display-flex-center">
         <div className="landing-container animation">
           <h1 className="landing-title">Money Insight</h1>
 
@@ -80,7 +103,7 @@ export default function Landing() {
                 />
               </div>
 
-              <div className="landing-select-container">
+              <div className="landing-select-container display-flex-center">
                 <button
                   className="landing-password-new"
                   onClick={handleSetNewData(true)}
@@ -97,21 +120,33 @@ export default function Landing() {
               </div>
             </>
           ) : (
-            <div className="landing-new-container animation">
-              <form onSubmit={handleStoreNameSubmit}>
-                <h3>Your Store Name:</h3>
+            <div className="landing-new-container display-flex-center">
+              <form
+                onSubmit={handleStoreNameSubmit}
+                className="display-flex-center"
+              >
+                <label htmlFor="storeName">🚀 Store Name</label>
                 <input
                   type="text"
                   placeholder="Store Name (가게 이름)"
                   name="storeName"
+                  id="storeName"
                   required
                 ></input>
-                {/* <input
-                type="password"
-                placeholder="Password"
-                name="password"
-                required
-              ></input> */}
+                <label htmlFor="password">🚀 Password</label>
+                <input
+                  type="password"
+                  placeholder="Password"
+                  name="password"
+                  id="password"
+                  onKeyUp={handleKeyPress}
+                  required
+                ></input>
+                {capsLockWarning && (
+                  <p className="caps-lock-warning caps-lock-warning-register">
+                    * Caps Lock is ON
+                  </p>
+                )}
                 <button type="submit" className="landing-new-container-start">
                   START
                 </button>
@@ -134,6 +169,7 @@ export default function Landing() {
           onConfirm={() => {
             localStorage.clear();
             localStorage.setItem("storeName", storeName);
+            localStorage.setItem("encryptedPassword", encryptedPassword);
             navigateToExpenseManager();
           }}
           message={message}
@@ -144,13 +180,24 @@ export default function Landing() {
         <YesNoModal
           setConfirmModal={setConfirmModalForCurrentUser}
           isConfirmModal={isConfirmModalForCurrentUser}
-          onConfirm={navigateToExpenseManager}
+          // onConfirm={navigateToExpenseManager}
+          onConfirm={() => setPasswordModal(true)}
           message={message}
         />
       )}
 
       {isAlertModal && (
         <AlertModal setAlertModal={setAlertModal} message={alertMessage} />
+      )}
+
+      {isLoading && <Loading />}
+
+      {isPasswordModal && (
+        <InputModal
+          setModal={setPasswordModal}
+          type="Passowrd"
+          onSubmit={navigateToExpenseManager}
+        />
       )}
     </>
   );

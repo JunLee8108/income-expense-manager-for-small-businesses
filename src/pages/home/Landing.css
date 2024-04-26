@@ -1,19 +1,21 @@
 .landing-bg {
-  display: flex;
   height: 100vh;
-  justify-content: center;
-  align-items: center;
 }
 
 .landing-container {
   text-align: center;
+  display: flex;
+  justify-content: safe center;
+  align-items: safe center;
+  flex-direction: column;
   width: 100%;
-  max-width: 600px;
-  background: snow;
-  color: #202020;
+  max-width: 650px;
+  height: 90%;
+  max-height: 840px;
+  overflow-y: auto;
   padding: 30px;
   border-radius: 15px;
-  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.5);
 }
 
 .logo {
@@ -36,17 +38,14 @@
 .landing-select-container {
   margin: 20px 0;
   margin-bottom: 40px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   gap: 30px;
 }
 
 .landing-password-new,
 .landing-password-current {
-  width: 40%;
-  padding: 20px 0;
+  width: 200px;
+  height: 60px;
+  padding: 0px;
   border: none;
   font-size: 1rem;
   border-radius: 10px;
@@ -54,48 +53,45 @@
   font-weight: bold;
   transition: 0.4s all ease;
   cursor: pointer;
-  color: green;
-  border: 2px solid green;
-  background-color: transparent;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
+  /* color: black; */
+  /* border: 2px solid green; */
+  background-color: var(--mint);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
 }
 
 .landing-password-new:hover,
 .landing-password-current:hover {
-  background-color: green;
+  background-color: var(--mintHover);
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
 }
 
 .landing-new-container {
-  display: flex;
   margin: 30px 0;
   margin-top: 50px;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
   gap: 1.5rem;
   z-index: 999;
 }
 
 .landing-new-container form {
-  display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
   gap: 1.5rem;
   z-index: 999;
 }
 
-.landing-new-container form h3 {
-  margin: 0;
+.back-btn-container {
+  width: 100%;
+  text-align: left;
 }
 
-.back-btn-container {
-  width: 80%;
-  display: flex;
+.landing-new-container label {
+  width: 100%;
+  text-align: left;
+  font-weight: 550;
+  margin-bottom: 0;
 }
 
 .landing-new-container input {
@@ -104,9 +100,11 @@
   border-radius: 5px;
   border: 1px solid black;
   z-index: 999;
+  margin-bottom: 15px;
 }
 
 .landing-new-container-start {
+  /* margin-top: 15px; */
   padding: 15px 18px;
   width: 100%;
   color: white;
@@ -124,18 +122,19 @@
   font-weight: bold;
   padding: 0px;
   background-color: transparent;
-  padding: 8px;
+  color: white;
+  padding: 8px 12px;
   border-radius: 10px;
   transition: 0.4s all ease;
   cursor: pointer;
 }
 
 .landing-new-container-start:hover {
-  opacity: 0.5;
+  background-color: #131313;
 }
 
 .back-btn-container button:hover {
-  background-color: rgba(0, 0, 0, 0.1);
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 .landing-owner {
