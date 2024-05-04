@@ -43,112 +43,44 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  /* flex-direction: column; */
   padding-top: 40px;
   padding-bottom: 50px;
-  /* padding: 40px 10px; */
-  gap: 5.5rem;
-  /* background-color: red; */
+  gap: 3.8rem;
   border-bottom: 0.5px dotted gray;
-  /* padding-bottom: 50px; */
 }
 
 .app-income-expense-switch h1 {
-  /* margin-top: 0; */
-  font-size: 1.4rem;
-  /* color: #ff3131; */
-  /* text-shadow: 2px 2px 2px rgba(0, 0, 0, 1); */
+  font-size: 1.2rem;
   text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.6);
   letter-spacing: 1px;
-  /* margin-top: 30px; */
-  /* background-color: red; */
-  /* margin-bottom: 0; */
   cursor: pointer;
   transition: 0.3s all ease;
-  border-bottom: 2px solid transparent;
   font-weight: 550;
-  padding: 15px;
-}
-
-.app-income-expense-switch h1.income {
-  /* color: #6e78ff; */
-  border-bottom: 2px solid #4076fa;
-  text-shadow: 2px 2px 2px rgba(0, 0, 0, 1);
-  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); */
-}
-
-.app-income-expense-switch h1.expense {
-  /* color: #ff3131; */
-  /* border-bottom: 2px solid #ff3131; */
-  border-bottom: 2px solid #ff3131;
-  text-shadow: 2px 2px 2px rgba(0, 0, 0, 1);
-  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); */
-}
-
-.app-income-expense-switch h1:nth-child(2) {
-  color: #4076fa;
+  padding: 23px 20px;
+  border-radius: 10px;
   transition: 0.3 all ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+}
+
+.app-income-expense-switch h1.income,
+.app-income-expense-switch h1.expense {
+  text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 .app-income-expense-switch h1:nth-child(1) {
   color: #ff3131;
-  transition: 0.3 all ease;
 }
 
-.app-income-expense-switch h1:nth-child(1):hover {
-  border-bottom: 2px solid #ff3131;
+.app-income-expense-switch h1:nth-child(3) {
+  color: #4076fa;
+}
+
+.app-income-expense-switch h1:nth-child(1):hover,
+.app-income-expense-switch h1:nth-child(3):hover {
   text-shadow: 2px 2px 2px rgba(0, 0, 0, 1);
-  /* background-color: #ff3131; */
-  /* color: white; */
-}
-
-.app-income-expense-switch h1:nth-child(2):hover {
-  /* background-color: #6e78ff;
-  color: white; */
-  text-shadow: 2px 2px 2px rgba(0, 0, 0, 1);
-  border-bottom: 2px solid #4076fa;
-}
-
-.app-income-expense-switch button {
-  padding: 10px 0px;
-  width: 42px;
-  background-color: transparent;
-  font-weight: 550;
-  color: white;
-  /* text-shadow: 2px 2px 2px rgba(0, 0, 0, 1); */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-  border: 1px solid white;
-  /* border: none; */
-  border-radius: 10px;
-  cursor: pointer;
-  transition: 0.3s all ease;
-  font-size: 0.9rem;
-}
-
-.app-income-expense-switch button:hover {
-  background-color: white;
-  color: #202020;
-  /* text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.2); */
-}
-
-.flip-animation {
-  animation: fadeRotate 0.6s ease-out;
-}
-
-@keyframes fadeRotate {
-  0% {
-    /* transform: translateY(0px); */
-    opacity: 0;
-  }
-  50% {
-    /* transform: translateY(20px); */
-    opacity: 0;
-  }
-
-  100% {
-    /* transform: translateY(0px); */
-    opacity: 1;
-  }
+  background-color: rgba(0, 0, 0, 0.6);
 }
 
 .app-navbar-container {

@@ -1,6 +1,6 @@
-import AddTapModal from "../../component/common/AddTapModal";
-import YesNoModal from "../../component/common/modal/YesNoModal";
-import AlertModal from "../../component/common/modal/AlertModal";
+import AddTapModal from "../../../component/common/AddTapModal";
+import YesNoModal from "../../../component/common/modal/YesNoModal";
+import AlertModal from "../../../component/common/modal/AlertModal";
 
 import { useState } from "react";
 

@@ -5,7 +5,6 @@ const {
   dialog,
   Menu,
   globalShortcut,
-  safeStorage,
 } = require("electron");
 // const { autoUpdater } = require("electron-updater");
 const fs = require("fs");
@@ -15,7 +14,8 @@ const XLSX = require("xlsx");
 
 const crypto = require("crypto");
 const algorithm = "aes-256-cbc";
-const secretKey = "thisis32bytepleaseIdontknowthisa"; // 32 characters for AES-256
+
+require("dotenv").config();
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -60,6 +60,7 @@ function createWindow() {
   // Unregister shortcut when window loses focus
   win.on("blur", () => {
     globalShortcut.unregister("CommandOrControl+S");
+    globalShortcut.unregister("CommandOrControl+L");
     globalShortcut.unregister("CommandOrControl+I");
   });
 
@@ -199,32 +200,57 @@ app.on("activate", () => {
   }
 });
 
-// Password Encryption and Decryption
+// Password & Security Questions Encryption and Decryption
 ipcMain.on("encrypt-password", (event, password) => {
-  const encryptedPassword = safeStorage.encryptString(password).toString("hex");
-  event.sender.send("encrypted-password", encryptedPassword);
+  const encryptedData = encrypt(password); // 데이터 암호화 함수 호출
+  event.sender.send("encrypted-password", encryptedData);
 });
 
-function decryptPassword(encryptedPasswordHex) {
-  const encryptedPasswordBuffer = Buffer.from(encryptedPasswordHex, "hex");
-  const decryptedPassword = safeStorage.decryptString(encryptedPasswordBuffer);
-  return decryptedPassword;
-}
+ipcMain.on("encrypt-sq1", (event, sq1) => {
+  const encryptedData = encrypt(sq1); // 데이터 암호화 함수 호출
+  event.sender.send("encrypted-sq1", encryptedData);
+});
+
+ipcMain.on("encrypt-sq2", (event, sq2) => {
+  const encryptedData = encrypt(sq2); // 데이터 암호화 함수 호출
+  event.sender.send("encrypted-sq2", encryptedData);
+});
 
 ipcMain.on("verify-password", (event, { password, encryptedPassword }) => {
-  const decryptedStoredPassword = decryptPassword(encryptedPassword);
+  try {
+    const decryptedData = decrypt(encryptedPassword); // 기존에 저장된 암호화된 데이터를 복호화
+    const isMatch = password === decryptedData; // 입력된 데이터와 복호화된 데이터 비교
+    event.sender.send("password-verified", isMatch);
+  } catch (error) {
+    console.error("Data verification error:", error);
+    event.sender.send("password-verified", false); // 오류 발생 시 false 반환
+  }
+});
 
-  if (password === decryptedStoredPassword) {
-    event.sender.send("password-verification", true);
-  } else {
-    event.sender.send("password-verification", false);
+ipcMain.on("verify-security", (event, { sq1, storedSQ1, sq2, storedSQ2 }) => {
+  try {
+    const decrypted1 = decrypt(storedSQ1);
+    const decrypted2 = decrypt(storedSQ2);
+
+    if (sq1 === decrypted1 && sq2 === decrypted2) {
+      return event.sender.send("security-verified", true);
+    } else {
+      return event.sender.send("security-verified", false); // 오류 발생 시 false 반환
+    }
+  } catch (error) {
+    console.error("Data verification error:", error);
+    event.sender.send("security-verified", false); // 오류 발생 시 false 반환
   }
 });
 
 // Data Encryption
 function encrypt(text) {
   let iv = crypto.randomBytes(16);
-  let cipher = crypto.createCipheriv(algorithm, Buffer.from(secretKey), iv);
+  let cipher = crypto.createCipheriv(
+    algorithm,
+    Buffer.from(process.env.REACT_APP_ENCRYPTION_KEY),
+    iv
+  );
   let encrypted = cipher.update(text);
   encrypted = Buffer.concat([encrypted, cipher.final()]);
   return iv.toString("hex") + ":" + encrypted.toString("hex");
@@ -235,11 +261,16 @@ function decrypt(text) {
   let parts = text.split(":");
   let iv = Buffer.from(parts.shift(), "hex");
   let encryptedText = Buffer.from(parts.join(":"), "hex");
-  let decipher = crypto.createDecipheriv(algorithm, Buffer.from(secretKey), iv);
+  let decipher = crypto.createDecipheriv(
+    algorithm,
+    Buffer.from(process.env.REACT_APP_ENCRYPTION_KEY),
+    iv
+  );
   let decrypted = decipher.update(encryptedText);
   decrypted = Buffer.concat([decrypted, decipher.final()]);
   return decrypted.toString();
 }
+
 // function decrypt(text) {
 //   try {
 //     let parts = text.split(":");
@@ -270,34 +301,51 @@ function decrypt(text) {
 
 let autoSaveFilePath = null;
 
-ipcMain.on("save-data", (event, { expenseData, incomeData }) => {
-  dialog
-    .showSaveDialog({
-      title: "Save Data",
-      defaultPath: app.getPath("documents"),
-      filters: [{ name: "JSON Files", extensions: ["json"] }],
-    })
-    .then((file) => {
-      if (!file.canceled && file.filePath) {
-        console.log(incomeData);
-        autoSaveFilePath = file.filePath;
-        const combinedData = { expenseData, incomeData };
-        const encryptedData = encrypt(JSON.stringify(combinedData)); // 데이터 암호화
-        // fs.writeFileSync(file.filePath, JSON.stringify(combinedData, null, 2));
-        fs.writeFileSync(file.filePath, encryptedData); // 암호화된 데이터 저장
-        event.sender.send("saved-data", JSON.parse('"success"'));
-        dialog.showMessageBox({
-          type: "info",
-          title: "Data Saved",
-          message: "The data has been successfully saved. (저장 완료)",
-        });
-      }
-    })
-    .catch((err) => {
-      console.error("Save File Error:", err);
-      dialog.showErrorBox("Error", "Failed to save data.");
-    });
-});
+ipcMain.on(
+  "save-data",
+  (
+    event,
+    { expenseData, incomeData, storedPassword, storedSQ1, storedSQ2, taps }
+  ) => {
+    dialog
+      .showSaveDialog({
+        title: "Save Data",
+        defaultPath: app.getPath("documents"),
+        filters: [{ name: "JSON Files", extensions: ["json"] }],
+      })
+      .then((file) => {
+        if (!file.canceled && file.filePath) {
+          autoSaveFilePath = file.filePath;
+          const combinedData = {
+            expenseData,
+            incomeData,
+            storedPassword,
+            storedSQ1,
+            storedSQ2,
+            taps,
+          };
+
+          // fs.writeFileSync(
+          //   file.filePath,
+          //   JSON.stringify(combinedData, null, 2)
+          // );
+
+          const encryptedData = encrypt(JSON.stringify(combinedData)); // 데이터 암호화
+          fs.writeFileSync(file.filePath, encryptedData); // 암호화된 데이터 저장
+          event.sender.send("saved-data", JSON.parse('"success"'));
+          dialog.showMessageBox({
+            type: "info",
+            title: "Data Saved",
+            message: "The data has been successfully saved. (저장 완료)",
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Save File Error:", err);
+        dialog.showErrorBox("Error", "Failed to save data.");
+      });
+  }
+);
 
 ipcMain.on("auto-save-data", (event, { expenseData, incomeData }) => {
   if (!autoSaveFilePath) {
@@ -326,8 +374,7 @@ ipcMain.on("auto-save-data", (event, { expenseData, incomeData }) => {
   }
 });
 
-// Handle load data request
-ipcMain.on("load-data", (event) => {
+ipcMain.on("load-data-request", (event) => {
   dialog
     .showOpenDialog({
       title: "Load Data",
@@ -337,27 +384,34 @@ ipcMain.on("load-data", (event) => {
     })
     .then((file) => {
       if (!file.canceled && file.filePaths.length > 0) {
-        const filePath = file.filePaths[0]; // 로드한 파일의 원본 경로
-        autoSaveFilePath = filePath; // 원본 파일 경로를 저장
-
-        // const data = fs.readFileSync(filePath, "utf8");
-        const encryptedData = fs.readFileSync(filePath, "utf8");
-        const decryptedData = decrypt(encryptedData); // 데이터 복호화
-        event.sender.send("loaded-data", JSON.parse(decryptedData));
-        // event.sender.send("loaded-data", JSON.parse(data));
-
-        dialog.showMessageBox({
-          type: "info",
-          title: "Data Loaded",
-          message:
-            "The data has been successfully loaded. (성공적으로 로드하였습니다.)",
-        });
+        event.sender.send("request-password", file.filePaths[0]);
       }
     })
     .catch((err) => {
       console.error("Load File Error:", err);
       dialog.showErrorBox("Error", "Failed to load data.");
     });
+});
+
+ipcMain.on("verify-password-and-load", (event, { password, filePath }) => {
+  const encryptedData = fs.readFileSync(filePath, "utf8");
+  const decryptedData = decrypt(encryptedData); // 데이터 복호화
+  const jsonData = JSON.parse(decryptedData);
+
+  const encryptedPassword = jsonData.storedPassword;
+  const decryptedPassword = decrypt(encryptedPassword);
+
+  if (password === decryptedPassword) {
+    event.sender.send("loaded-data", jsonData);
+    dialog.showMessageBox({
+      type: "info",
+      title: "Data Loaded",
+      message:
+        "The data has been successfully loaded. (성공적으로 로드하였습니다.)",
+    });
+  } else {
+    event.sender.send("load-error", "Password does not match");
+  }
 });
 
 ipcMain.on("show-error-dialog", (event, message) => {

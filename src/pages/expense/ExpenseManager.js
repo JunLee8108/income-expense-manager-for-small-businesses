@@ -1,38 +1,50 @@
 import "./ExpenseManager.css";
+import { foodSortList } from "../../component/util/data";
 
-import { navbarList, foodSortList } from "../../component/util/data";
+// Custom Hook
 import { useSortByDate } from "../../component/common/useSortByDate";
 import useAutoSaveData from "../../component/common/useAutoSaveData";
 import useMonthName from "../../component/common/useMonthName";
 
+import IncomeManager from "./IncomeManger";
 import ExpenseDashboard from "./ExpenseDashboard";
+
+// Modals
 import DataInsertModal from "../../component/common/DataInsertModal";
 import DataEditModal from "../../component/common/DataEditModal";
 import DeleteAllModal from "../../component/common/DeleteAllModal";
-import DropdownTap from "../../component/common/DropdownTap";
-import PageInfo from "../../component/common/PageInfo";
-import SelectedItemsCounter from "../../component/common/SelectedItemsCounter";
-import Setting from "./Setting";
 import AlertModal from "../../component/common/modal/AlertModal";
-import IncomeManager from "./IncomeManger";
+import RequestPasswordForFileLoad from "../../component/common/modal/RequestPasswordForFileLoad";
+import DropdownTap from "../../component/common/DropdownTap";
 
-import { Fragment, useState, useEffect, useRef } from "react";
+// Components
+import Navbar from "./component/Navbar";
+import Setting from "./component/Setting";
+import DateSelector from "./component/DataSelector";
+import SwitchManagers from "./component/SwitchManagers";
+import PageInfo from "./component/PageInfo";
+import SelectedItemsCounter from "./component/SelectedItemsCounter";
 
+// Libraries
+import {
+  Fragment,
+  useState,
+  useEffect,
+  useRef,
+  useMemo,
+  useCallback,
+} from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-
-import { useNavigate, useLocation } from "react-router-dom";
+const { ipcRenderer } = window.require("electron");
 
 function ExpenseManager() {
-  const sortByDate = useSortByDate();
+  const isMounted = useRef(false);
 
+  const storeName = localStorage.getItem("storeName");
   const currentDate = new Date();
   const formattedMonth = `${currentDate.getFullYear()}-${String(
     currentDate.getMonth() + 1
   ).padStart(2, "0")}`;
-
-  const isMounted = useRef(false);
-
-  const { ipcRenderer } = window.require("electron");
 
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -40,52 +52,52 @@ function ExpenseManager() {
   const [year, setYear] = useState("");
   const [month, setMonth] = useState("");
 
-  const [expenseData, setExpenseData] = useState([]);
-  const [isDataInsert, setDataInsert] = useState(false);
+  const [isFilterOn, setFilterOn] = useState(false);
+  const [filters, setFilters] = useState({
+    filterCategory: "All",
+    minAmount: "",
+    maxAmount: "",
+    startDate: "",
+    endDate: "",
+  });
 
+  const updateFilter = (key, value) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [key]: value,
+    }));
+  };
+
+  const [expenseData, setExpenseData] = useState([]);
+  const [incomeData, setIncomeData] = useState([]);
+  const [isDataInsert, setDataInsert] = useState(false);
   const [isEditBtn, setEditBtn] = useState(false);
   const [editIndex, setEditindex] = useState(-1);
 
-  const [navbarActiveIndex, setNavbarActiveIndex] = useState(0);
-
   const [isDeleteBtnClick, setDeleteBtnClick] = useState(false);
-
-  const [incomeData, setIncomeData] = useState([]);
 
   const [isAllChecked, setAllChecked] = useState(false);
 
-  const [taps, setTaps] = useState(["Overview"]);
+  const [taps, setTaps] = useState(() => {
+    const loadedTaps = localStorage.getItem("taps");
+    return loadedTaps ? JSON.parse(loadedTaps) : ["Overview"];
+  });
 
-  const [viewMode, setViewMode] = useState("table");
+  const [viewMode, setViewMode] = useState("Table");
+  const [isIncomeView, setIncomeView] = useState("Expense");
 
-  const [isFilterOn, setFilterOn] = useState(false);
+  const [taxOn, setTaxOn] = useState(() => {
+    const taxStored = localStorage.getItem("tax");
+    return !!taxStored;
+  });
 
   const [isAlertModal, setAlertModal] = useState(false);
   const [alertMessage, setAlertMessage] = useState("");
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [selectedFilePath, setSelectedFilePath] = useState("");
 
   const monthName = useMonthName(month);
-
-  const storeName = localStorage.getItem("storeName");
-
-  const [isIncomeView, setIncomeView] = useState("Expense");
-  const [animate, setAnimate] = useState(false);
-
-  useEffect(() => {
-    if (animate) {
-      // 애니메이션 후에 클래스를 제거하기 위한 타이머
-      const timer = setTimeout(() => {
-        setAnimate(false);
-      }, 600); // 애니메이션 시간과 일치
-      return () => clearTimeout(timer);
-    }
-  }, [animate, isIncomeView]);
-
-  const handleIncomeView = (type) => () => {
-    setAnimate(true); // 버튼 클릭 시 애니메이션 활성화
-    // setIncomeView((prev) => (prev === "Expense" ? "Income" : "Expense"));
-    if (type === "Expense") return setIncomeView("Expense");
-    setIncomeView("Income");
-  };
+  const sortByDate = useSortByDate();
 
   const handleFilter = () => {
     if (filteredData.length === 0 && !isFilterOn) {
@@ -100,11 +112,13 @@ function ExpenseManager() {
   };
 
   const handleFilterReset = () => {
-    setFilterCategory("All");
-    setMinAmount("");
-    setMaxAmount("");
-    setStartDate("");
-    setEndDate("");
+    setFilters({
+      filterCategory: "All",
+      minAmount: "",
+      maxAmount: "",
+      startDate: "",
+      endDate: "",
+    });
   };
 
   const handleTableReset = () => {
@@ -132,33 +146,19 @@ function ExpenseManager() {
       setMonth("All");
       return;
     }
-
     const parts = date.split("-");
     setYear(Number(parts[0]));
     setMonth(parts[1]);
   }, [isAllChecked, date]);
-
-  const navigate = useNavigate();
-  const location = useLocation();
 
   const handleExpenseDate = (e) => {
     setAllChecked(false);
     setDate(e.target.value);
   };
 
-  // const handleNavigate = () => {
-  //   navigate("/income", {
-  //     state: { value: expenseData, incomeData: incomeData },
-  //   });
-  // };
-
   const handleFromTap = (index) => () => {
     setActiveIndex(index);
     sortByDate(expenseData, "on", setExpenseData);
-  };
-
-  const handleDataInsert = () => {
-    setDataInsert(true);
   };
 
   const handleEditBtn = (id) => () => {
@@ -166,73 +166,57 @@ function ExpenseManager() {
     setEditindex(id);
   };
 
-  // Check Local Storage
-  useEffect(() => {
-    const loadedTaps = localStorage.getItem("taps");
-    if (loadedTaps) {
-      setTaps(JSON.parse(loadedTaps));
-    }
-
-    if (localStorage.getItem("tax")) setTaxOn(true);
-  }, []);
-
-  const handleNavbarBtn = (index, name) => () => {
-    setNavbarActiveIndex(index);
-
+  const handleNavbarBtn = (name) => () => {
     switch (name) {
       case "Dashboard":
-        setViewMode("dashboard");
+        setViewMode("Dashboard");
         break;
       case "Table":
-        setViewMode("table");
+        setViewMode("Table");
         break;
       default:
-        setViewMode("settings");
+        setViewMode("Setting");
         break;
     }
   };
 
-  const [filterCategory, setFilterCategory] = useState("All");
-  const [minAmount, setMinAmount] = useState("");
-  const [maxAmount, setMaxAmount] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
+  const filteredData = useMemo(() => {
+    const start = filters.startDate ? new Date(filters.startDate) : null;
+    const end = filters.endDate
+      ? new Date(filters.endDate + "T23:59:59")
+      : null;
 
-  const getFilteredData = () => {
     return expenseData.filter((item) => {
-      // 기본 날짜 범위 조건 (사용자가 날짜 필터를 사용하지 않을 때 활성화)
-      const matchDate =
-        (item.month === month || month === "All") && item.year === year;
-
       const itemDate = new Date(
         item.year,
         Number(item.month) - 1,
         item.day || 1
       );
-      const start = startDate ? new Date(startDate) : null;
-      const end = endDate ? new Date(endDate + "T23:59:59") : null;
 
-      // 사용자가 날짜 필터를 설정했는지 여부에 따른 날짜 범위 조건 조정
-      let matchDateRange = true;
-      if (startDate || endDate) {
-        // 사용자가 날짜 필터를 사용했을 경우, 해당 범위 내의 데이터만 필터링
+      // 기본 날짜 범위 조건
+      const matchDate =
+        (item.month === month || month === "All") && item.year === year;
+      let matchDateRange = matchDate;
+
+      // 사용자가 날짜 필터를 설정한 경우 조정된 날짜 범위 조건
+      if (filters.startDate || filters.endDate) {
         matchDateRange =
           (!start || itemDate >= start) && (!end || itemDate <= end);
-      } else {
-        // 사용자가 날짜 필터를 사용하지 않았을 경우, 기존의 month와 year 조건을 사용
-        matchDateRange = matchDate;
       }
 
       // 다른 필터링 조건
       const matchType =
         taps[activeIndex] === item.from || taps[activeIndex] === "Overview";
-      const matchAmountData = item.amount !== "";
       const matchCategory =
-        filterCategory === "All" || item.category === filterCategory;
+        filters.filterCategory === "All" ||
+        filters.filterCategory === item.category;
       const matchMinAmount =
-        !minAmount || parseFloat(item.amount) >= parseFloat(minAmount);
+        !filters.minAmount ||
+        parseFloat(item.amount) >= parseFloat(filters.minAmount);
       const matchMaxAmount =
-        !maxAmount || parseFloat(item.amount) <= parseFloat(maxAmount);
+        !filters.maxAmount ||
+        parseFloat(item.amount) <= parseFloat(filters.maxAmount);
+      const matchAmountData = item.amount !== "";
 
       return (
         matchType &&
@@ -243,40 +227,61 @@ function ExpenseManager() {
         matchDateRange
       );
     });
-  };
+  }, [
+    expenseData,
+    month,
+    year,
+    filters.startDate,
+    filters.endDate,
+    taps,
+    activeIndex,
+    filters.filterCategory,
+    filters.minAmount,
+    filters.maxAmount,
+  ]);
 
-  const filteredData = getFilteredData(); // 필터링된 데이터
+  const calculateTotals = useMemo(() => {
+    const totals = { amount: 0, count: 0, tax: 0 };
 
-  const handleTotalAmountCount = (type) => {
-    if (type === "amount") {
-      return filteredData
-        .reduce((total, item) => total + item.amount || 0, 0)
-        .toFixed(2);
-    } else if (type === "count") {
-      return filteredData.reduce((total, item) => total + 1, 0);
-    } else if (type === "tax") {
-      return filteredData
-        .reduce((total, item) => total + item.tax || 0, 0)
-        .toFixed(2);
-    }
-  };
+    filteredData.forEach((item) => {
+      totals.amount += item.amount || 0;
+      totals.tax += item.tax || 0;
+      totals.count += 1;
+    });
+
+    // 숫자를 문자열로 변환하고 소수점 두 자리로 고정
+    totals.amount = totals.amount.toFixed(2);
+    totals.tax = totals.tax.toFixed(2);
+
+    return totals;
+  }, [filteredData]);
 
   //* ITEM TOTAL AMOUNT FOR MAIN CONTENT *//
-  const total = handleTotalAmountCount("amount");
-
+  const total = calculateTotals.amount;
   //* ITEM TOTAL TAX FOR MAIN CONTENT *//
-  const totalTax = handleTotalAmountCount("tax");
-
+  const totalTax = calculateTotals.tax;
   //* ITEM TOTAL COUNT FOR MAIN CONTENT *//
-  const itemCount = handleTotalAmountCount("count");
+  const itemCount = calculateTotals.count;
 
   const [dataInitialized, setDataInitialized] = useState(false);
   const [fileId, setFileId] = useState("");
 
   //* SAVE DATA AS A JSON FILE *//
-  const saveDataToFile = () => {
-    ipcRenderer.send("save-data", { expenseData, incomeData });
-  };
+  const saveDataToFile = useCallback(() => {
+    const storedPassword = localStorage.getItem("encryptedPassword") || "";
+    const storedSQ1 = localStorage.getItem("encryptedSecurityQuestion1") || "";
+    const storedSQ2 = localStorage.getItem("encryptedSecurityQuestion2") || "";
+    const taps = localStorage.getItem("taps") || "";
+
+    ipcRenderer.send("save-data", {
+      expenseData,
+      incomeData,
+      storedPassword,
+      storedSQ1,
+      storedSQ2,
+      taps,
+    });
+  }, [expenseData, incomeData]);
 
   // Shortcut for saving data
   useEffect(() => {
@@ -304,8 +309,28 @@ function ExpenseManager() {
     // eslint-disable-next-line
   }, []);
 
-  const loadDataFromFile = () => {
-    ipcRenderer.send("load-data");
+  // Memoized callback for file loading
+  const loadDataFromFile = useCallback(() => {
+    ipcRenderer.send("load-data-request");
+  }, []);
+
+  useEffect(() => {
+    ipcRenderer.on("request-password", (event, filePath) => {
+      setSelectedFilePath(filePath);
+      setShowPasswordModal(true);
+    });
+
+    return () => {
+      ipcRenderer.removeAllListeners("request-password");
+    };
+    // eslint-disable-next-line
+  }, []);
+
+  const handlePasswordSubmit = (password) => {
+    ipcRenderer.send("verify-password-and-load", {
+      password,
+      filePath: selectedFilePath,
+    });
   };
 
   useEffect(() => {
@@ -319,11 +344,28 @@ function ExpenseManager() {
 
   useEffect(() => {
     const handleDataLoad = (event, data) => {
+      setShowPasswordModal(false); // 모달 닫기
+
       if (data) {
-        const { expenseData, incomeData } = data;
+        const {
+          expenseData,
+          incomeData,
+          // storedPassword,
+          // storedSQ1,
+          // storedSQ2,
+          taps,
+        } = data;
 
-        // console.log(URLIncomeData);
+        if (taps) {
+          localStorage.setItem("taps", taps);
+          setTaps(JSON.parse(taps));
+        }
 
+        sortByDate(expenseData, "on", setExpenseData);
+        setIncomeData(incomeData);
+
+        // setDataInitialized(true);
+        // setFileId(Date());
         // const monthNamesToNumbers = {
         //   January: "01",
         //   February: "02",
@@ -358,11 +400,6 @@ function ExpenseManager() {
         //     amount: amountData, // 'amountData'를 'amount'으로 변경
         //   })
         // );
-
-        sortByDate(expenseData, "on", setExpenseData);
-        setIncomeData(incomeData);
-        setDataInitialized(true);
-        setFileId(Date());
       }
     };
 
@@ -370,6 +407,20 @@ function ExpenseManager() {
 
     return () => {
       ipcRenderer.removeListener("loaded-data", handleDataLoad);
+    };
+    // eslint-disable-next-line
+  }, []);
+
+  useEffect(() => {
+    const handleError = (event, errorMessage) => {
+      setAlertMessage("Password does not match");
+      setAlertModal(true);
+    };
+
+    ipcRenderer.on("load-error", handleError);
+
+    return () => {
+      ipcRenderer.removeListener("load-error", handleError);
     };
     // eslint-disable-next-line
   }, []);
@@ -471,21 +522,6 @@ function ExpenseManager() {
   //   "yes"
   // );
 
-  // useEffect(() => {
-  //   if (location.state) {
-  //     const expenseInfo = location.state.value;
-  //     const incomeData = location.state.incomeData;
-
-  //     if (expenseInfo.length > 0) {
-  //       setExpenseData(expenseInfo);
-  //     }
-
-  //     if (incomeData.length > 0) {
-  //       setIncomeData(incomeData);
-  //     }
-  //   }
-  // }, [location.state]);
-
   const [currentPage, setCurrentPage] = useState(1);
   const [currentGroup, setCurrentGroup] = useState(1);
   const itemsPerPage = 20;
@@ -586,7 +622,13 @@ function ExpenseManager() {
     if (isMounted.current) {
       handleTableReset();
     }
-  }, [filterCategory, minAmount, maxAmount, startDate, endDate]);
+  }, [
+    filters.filterCategory,
+    filters.minAmount,
+    filters.maxAmount,
+    filters.startDate,
+    filters.endDate,
+  ]);
 
   useEffect(() => {
     if (isMounted.current) {
@@ -606,8 +648,6 @@ function ExpenseManager() {
   }, [currentItems, checkedItems]);
 
   useAutoSaveData(expenseData, incomeData);
-
-  const [taxOn, setTaxOn] = useState(false);
 
   const handleSettingTax = (command) => () => {
     if (command === "on") {
@@ -643,6 +683,7 @@ function ExpenseManager() {
   return (
     <>
       <div className="app">
+        {/* Show Selected Items */}
         {Object.keys(checkedItems).length > 0 && (
           <SelectedItemsCounter
             length={Object.keys(checkedItems).length}
@@ -663,10 +704,6 @@ function ExpenseManager() {
             />
           </button>
 
-          {/* <button onClick={handleNavigate} className="income-navigate-button">
-            Income Manager
-          </button> */}
-
           <button onClick={loadDataFromFile} className="save-load-btn">
             Load Data (불러오기)
             <FontAwesomeIcon
@@ -686,91 +723,34 @@ function ExpenseManager() {
         </section>
 
         {/* Viewmode Navbar */}
-        <section className="app-navbar-container">
-          {navbarList.map((content, index) => {
-            return (
-              <button
-                className={`navbar-btn ${
-                  navbarActiveIndex === index ? "navbar-btn-active" : null
-                }`}
-                onClick={handleNavbarBtn(index, content.name)}
-                key={index}
-              >
-                {content.name}
-                {content.icon}
-              </button>
-            );
-          })}
-        </section>
+        <Navbar viewMode={viewMode} handleNavbarBtn={handleNavbarBtn} />
 
-        {/* Switch Expense Manager and Income Manager */}
-        {viewMode !== "settings" && (
-          <section className="app-income-expense-switch">
-            {/* <h1
-              className={`${animate ? "flip-animation" : ""} ${
-                isIncomeView === "Expense" ? "expense" : "income"
-              }`}
-            >
-              {isIncomeView} Manager
-            </h1>
-            <h1
-              className={`${animate ? "flip-animation" : ""} ${
-                isIncomeView === "Expense" ? "expense" : "income"
-              }`}
-            >
-              {isIncomeView} Manager
-            </h1> */}
+        {/* Switch Managers, Date Selector, Data Insert */}
+        {viewMode !== "Setting" && (
+          <>
+            <SwitchManagers
+              setIncomeView={setIncomeView}
+              isIncomeView={isIncomeView}
+            />
 
-            <h1
-              onClick={handleIncomeView("Expense")}
-              className={` ${isIncomeView === "Expense" && "expense"}`}
-            >
-              Expense <FontAwesomeIcon icon="fa-solid fa-money-check-dollar" />
-            </h1>
+            <DateSelector
+              handleExpenseDate={handleExpenseDate}
+              date={date}
+              isAllChecked={isAllChecked}
+              handleAllChecked={handleAllChecked}
+            />
 
-            <h1
-              onClick={handleIncomeView("Income")}
-              className={` ${isIncomeView === "Income" && "income"}`}
+            <button
+              className="item-insert-button"
+              onClick={() => setDataInsert(true)}
             >
-              Income <FontAwesomeIcon icon="fa-solid fa-money-bill-trend-up" />
-            </h1>
-            {/* <button
-              onClick={handleIncomeView}
-              className={animate ? "flip-animation" : ""}
-            >
-              <FontAwesomeIcon icon="fa-solid fa-repeat" />
-            </button> */}
-          </section>
-        )}
-
-        {/* Select Date (Month and Year) */}
-        {viewMode !== "settings" && (
-          <section className="app-month-year">
-            <input
-              type="month"
-              className="app-month"
-              onChange={handleExpenseDate}
-              value={date}
-            ></input>
-
-            <label className="switch">
-              <input
-                type="checkbox"
-                id="all"
-                name="all"
-                checked={isAllChecked}
-                onChange={handleAllChecked}
-              />
-              <span className="slider"></span>
-            </label>
-            <label htmlFor="all" className="all-label">
-              {year} All (전체)
-            </label>
-          </section>
+              +
+            </button>
+          </>
         )}
 
         {/* Viewmode = table */}
-        {viewMode === "table" && isIncomeView === "Expense" && (
+        {viewMode === "Table" && isIncomeView === "Expense" && (
           <div className="table-content-container animation">
             <div className="main-container">
               <h2 className="main-header">
@@ -820,8 +800,10 @@ function ExpenseManager() {
                     <div className="filters-input-container">
                       <label htmlFor="filter-category">Category</label>
                       <select
-                        value={filterCategory}
-                        onChange={(e) => setFilterCategory(e.target.value)}
+                        value={filters.filterCategory}
+                        onChange={(e) =>
+                          updateFilter("filterCategory", e.target.value)
+                        }
                         id="filter-category"
                       >
                         <option value="All">모든 카테고리</option>
@@ -840,8 +822,10 @@ function ExpenseManager() {
                       <input
                         type="number"
                         placeholder="최소 금액"
-                        value={minAmount}
-                        onChange={(e) => setMinAmount(e.target.value)}
+                        value={filters.minAmount}
+                        onChange={(e) =>
+                          updateFilter("minAmount", e.target.value)
+                        }
                       />
                     </div>
 
@@ -850,8 +834,10 @@ function ExpenseManager() {
                       <input
                         type="number"
                         placeholder="최대 금액"
-                        value={maxAmount}
-                        onChange={(e) => setMaxAmount(e.target.value)}
+                        value={filters.maxAmount}
+                        onChange={(e) =>
+                          updateFilter("maxAmount", e.target.value)
+                        }
                       />
                     </div>
 
@@ -859,8 +845,10 @@ function ExpenseManager() {
                       <label>Start Date</label>
                       <input
                         type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
+                        value={filters.startDate}
+                        onChange={(e) =>
+                          updateFilter("startDate", e.target.value)
+                        }
                       />
                     </div>
 
@@ -868,8 +856,10 @@ function ExpenseManager() {
                       <label>End Date</label>
                       <input
                         type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
+                        value={filters.endDate}
+                        onChange={(e) =>
+                          updateFilter("endDate", e.target.value)
+                        }
                       />
                     </div>
 
@@ -1053,12 +1043,12 @@ function ExpenseManager() {
           </div>
         )}
 
-        {viewMode === "table" && isIncomeView === "Income" && (
+        {viewMode === "Table" && isIncomeView === "Income" && (
           <IncomeManager incomeData={incomeData} />
         )}
 
         {/* Viewmode = settings */}
-        {viewMode === "settings" && (
+        {viewMode === "Setting" && (
           <Setting
             taps={taps}
             setTaps={setTaps}
@@ -1070,7 +1060,7 @@ function ExpenseManager() {
         )}
 
         {/* Viewmode = dashboard */}
-        {viewMode === "dashboard" && (
+        {viewMode === "Dashboard" && (
           <ExpenseDashboard
             expenseData={expenseData}
             selectedYear={year.toString()}
@@ -1118,19 +1108,22 @@ function ExpenseManager() {
         />
       )}
 
-      {isAlertModal && (
-        <AlertModal setAlertModal={setAlertModal} message={alertMessage} />
+      {showPasswordModal && (
+        <RequestPasswordForFileLoad
+          setModal={setShowPasswordModal}
+          type="Data Password"
+          onSubmit={handlePasswordSubmit}
+          isAlertModal={isAlertModal}
+        />
       )}
 
-      {/* DATA INSERT BUTTON */}
-      <button
-        className={`item-insert-button ${
-          viewMode === "settings" || viewMode === "dashboard" ? "invisible" : ""
-        }`}
-        onClick={handleDataInsert}
-      >
-        +
-      </button>
+      {isAlertModal && (
+        <AlertModal
+          setAlertModal={setAlertModal}
+          isAlertModal={isAlertModal}
+          message={alertMessage}
+        />
+      )}
     </>
   );
 }

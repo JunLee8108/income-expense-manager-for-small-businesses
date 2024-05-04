@@ -37,9 +37,9 @@ const YesNoModal = ({
   return (
     <>
       <div
-        className="item-input-bg"
+        className="item-input-bg yes-no-modal"
         onClick={(e) => {
-          const target = document.querySelector(".item-input-bg");
+          const target = document.querySelector(".item-input-bg.yes-no-modal");
           if (e.target === target) {
             setConfirmModal(false);
           }

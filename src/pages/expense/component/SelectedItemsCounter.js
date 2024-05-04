@@ -1,5 +1,5 @@
 import "./SelectedItemsCounter.css";
-import YesNoModal from "./modal/YesNoModal";
+import YesNoModal from "../../../component/common/modal/YesNoModal";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";

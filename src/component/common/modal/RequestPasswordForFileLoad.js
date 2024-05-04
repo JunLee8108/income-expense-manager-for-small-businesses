@@ -1,39 +1,22 @@
 import React from "react";
 import "./Modal.css";
-import AlertModal from "./AlertModal";
 
 import { useState, useEffect, useRef } from "react";
 
-const { ipcRenderer } = window.require("electron");
-
-const InputModal = ({ setModal, type, onSubmit }) => {
-  const [message, setMessage] = useState("");
-  const [isAlertModal, setAlertModal] = useState(false);
+const RequestPasswordForFileLoad = ({
+  setModal,
+  type,
+  onSubmit,
+  isAlertModal,
+}) => {
   const [capsLockWarning, setCapsLockWarning] = useState(false);
   const inputRef = useRef(null);
 
   const handleOnSubmit = (e) => {
     e.preventDefault();
     inputRef.current.blur();
-
-    const encryptedPassword = localStorage.getItem("encryptedPassword");
-
-    const form = new FormData(e.currentTarget);
-    const password = form.get("password");
-
-    ipcRenderer.send("verify-password", { password, encryptedPassword });
-    ipcRenderer.once("password-verified", (event, isMatch) => {
-      if (isMatch) {
-        if (onSubmit.length > 0) {
-          onSubmit(password);
-        } else {
-          onSubmit();
-        }
-      } else {
-        setAlertModal(true);
-        setMessage("Password does not match");
-      }
-    });
+    const password = new FormData(e.currentTarget).get("password");
+    onSubmit(password);
   };
 
   const handleKeyPress = (e) => {
@@ -63,9 +46,11 @@ const InputModal = ({ setModal, type, onSubmit }) => {
   return (
     <>
       <div
-        className="item-input-bg input-modal"
+        className="item-input-bg request-password-modal"
         onClick={(e) => {
-          const target = document.querySelector(".item-input-bg.input-modal");
+          const target = document.querySelector(
+            ".item-input-bg.request-password-modal"
+          );
           if (e.target === target) {
             setModal(false);
           }
@@ -88,11 +73,7 @@ const InputModal = ({ setModal, type, onSubmit }) => {
           <button className="modal-button">Submit</button>
         </form>
       </div>
-
-      {isAlertModal && (
-        <AlertModal setAlertModal={setAlertModal} message={message} />
-      )}
     </>
   );
 };
-export default InputModal;
+export default RequestPasswordForFileLoad;
