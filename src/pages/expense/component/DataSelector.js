@@ -1,8 +1,8 @@
 export default function DateSelector({
   handleExpenseDate,
   date,
-  isAllChecked,
-  handleAllChecked,
+  isMonthAllChecked,
+  handleMonthAllChecked,
 }) {
   const parts = date.split("-");
   const year = parts[0];
@@ -21,8 +21,8 @@ export default function DateSelector({
           type="checkbox"
           id="all"
           name="all"
-          checked={isAllChecked}
-          onChange={handleAllChecked}
+          checked={isMonthAllChecked}
+          onChange={handleMonthAllChecked}
         />
         <span className="slider"></span>
       </label>

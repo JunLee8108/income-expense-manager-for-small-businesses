@@ -1,12 +1,13 @@
 import "../../App.css";
 import { yearList } from "../util/data";
 
-export default function DeleteAllModal({
-  setDeleteBtnClick,
-  expenseData,
-  setExpenseData,
-}) {
+import { useRecoilState } from "recoil";
+import { expenseDataState } from "../../recoil/store";
+
+export default function DeleteAllModal({ setDeleteBtnClick }) {
   const { ipcRenderer } = window.require("electron");
+
+  const [expenseData, setExpenseData] = useRecoilState(expenseDataState);
 
   const handleDeleteModal = (e) => {
     e.preventDefault();

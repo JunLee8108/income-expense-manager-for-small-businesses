@@ -1,13 +1,26 @@
 import "./ExpenseManager.css";
-import { foodSortList } from "../../component/util/data";
 
 // Custom Hook
 import { useSortByDate } from "../../component/common/useSortByDate";
+import { useSortStrings } from "../../component/common/useSortStrings";
+import { useSortNumbers } from "../../component/common/useSortNumber";
 import useAutoSaveData from "../../component/common/useAutoSaveData";
 import useMonthName from "../../component/common/useMonthName";
 
+// Recoil
+import { useRecoilState, useRecoilValue } from "recoil";
+import {
+  tapsState,
+  expenseCategoryTabsState,
+  expenseDataState,
+  incomeDataState,
+  incomeHeadersState,
+} from "../../recoil/store";
+
 import IncomeManager from "./IncomeManger";
 import ExpenseDashboard from "./ExpenseDashboard";
+import HeaderDisplay from "./component/HeaderDisplay";
+import SearchAndFilter from "./component/SearchAndFilter";
 
 // Modals
 import DataInsertModal from "../../component/common/DataInsertModal";
@@ -34,6 +47,7 @@ import {
   useMemo,
   useCallback,
 } from "react";
+
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 const { ipcRenderer } = window.require("electron");
 
@@ -45,6 +59,16 @@ function ExpenseManager() {
   const formattedMonth = `${currentDate.getFullYear()}-${String(
     currentDate.getMonth() + 1
   ).padStart(2, "0")}`;
+
+  const [expenseData, setExpenseData] = useRecoilState(expenseDataState);
+  const [incomeData, setIncomeData] = useRecoilState(incomeDataState);
+
+  const [taps, setTaps] = useRecoilState(tapsState);
+  const [expenseCategoryTabs, setExpenseCategoryTabs] = useRecoilState(
+    expenseCategoryTabsState
+  );
+
+  const [incomeHeaders, setIncomeHeaders] = useRecoilState(incomeHeadersState);
 
   const [activeIndex, setActiveIndex] = useState(0);
 
@@ -68,20 +92,12 @@ function ExpenseManager() {
     }));
   };
 
-  const [expenseData, setExpenseData] = useState([]);
-  const [incomeData, setIncomeData] = useState([]);
   const [isDataInsert, setDataInsert] = useState(false);
   const [isEditBtn, setEditBtn] = useState(false);
   const [editIndex, setEditindex] = useState(-1);
-
   const [isDeleteBtnClick, setDeleteBtnClick] = useState(false);
 
-  const [isAllChecked, setAllChecked] = useState(false);
-
-  const [taps, setTaps] = useState(() => {
-    const loadedTaps = localStorage.getItem("taps");
-    return loadedTaps ? JSON.parse(loadedTaps) : ["Overview"];
-  });
+  const [isMonthAllChecked, setMonthAllChecked] = useState(false);
 
   const [viewMode, setViewMode] = useState("Table");
   const [isIncomeView, setIncomeView] = useState("Expense");
@@ -98,6 +114,8 @@ function ExpenseManager() {
 
   const monthName = useMonthName(month);
   const sortByDate = useSortByDate();
+  const sortStrings = useSortStrings();
+  const sortNumbers = useSortNumbers();
 
   const handleFilter = () => {
     if (filteredData.length === 0 && !isFilterOn) {
@@ -106,12 +124,12 @@ function ExpenseManager() {
       return;
     }
 
-    handleFilterReset();
-    handleTableReset();
+    filterReset();
+    tablePageReset();
     setFilterOn((state) => !state);
   };
 
-  const handleFilterReset = () => {
+  const filterReset = () => {
     setFilters({
       filterCategory: "All",
       minAmount: "",
@@ -121,16 +139,27 @@ function ExpenseManager() {
     });
   };
 
-  const handleTableReset = () => {
+  const tablePageReset = () => {
     setCurrentPage(1);
     setCurrentGroup(1);
     setCheckedItems({});
     setIsTableHeadChecked(false);
   };
 
-  const handleAllChecked = () => {
-    setAllChecked((state) => !state);
+  const handleMonthAllChecked = () => {
+    setMonthAllChecked((state) => !state);
   };
+
+  useEffect(() => {
+    if (isMonthAllChecked) {
+      setActiveIndex(0);
+      setMonth("All");
+      return;
+    }
+    const parts = date.split("-");
+    setYear(Number(parts[0]));
+    setMonth(parts[1]);
+  }, [isMonthAllChecked, date]);
 
   const tableRef = useRef(null);
   const scrollToTableTop = (pageNumber) => {
@@ -140,25 +169,13 @@ function ExpenseManager() {
     }
   };
 
-  useEffect(() => {
-    if (isAllChecked) {
-      setActiveIndex(0);
-      setMonth("All");
-      return;
-    }
-    const parts = date.split("-");
-    setYear(Number(parts[0]));
-    setMonth(parts[1]);
-  }, [isAllChecked, date]);
-
   const handleExpenseDate = (e) => {
-    setAllChecked(false);
+    setMonthAllChecked(false);
     setDate(e.target.value);
   };
 
   const handleFromTap = (index) => () => {
     setActiveIndex(index);
-    sortByDate(expenseData, "on", setExpenseData);
   };
 
   const handleEditBtn = (id) => () => {
@@ -180,7 +197,34 @@ function ExpenseManager() {
     }
   };
 
+  const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
+
   const filteredData = useMemo(() => {
+    // 검색어가 있는 경우 검색어 조건으로만 필터링
+    if (debouncedSearchQuery) {
+      return expenseData.filter((item) => {
+        const normalizedSearchQuery = debouncedSearchQuery
+          .toLowerCase()
+          .replace(/\s+/g, "");
+        return (
+          item.from
+            .toLowerCase()
+            .replace(/\s+/g, "")
+            .includes(normalizedSearchQuery) ||
+          item.category
+            .toLowerCase()
+            .replace(/\s+/g, "")
+            .includes(normalizedSearchQuery) ||
+          item.item
+            .toLowerCase()
+            .replace(/\s+/g, "")
+            .includes(normalizedSearchQuery)
+        );
+      });
+    }
+
+    // 검색어가 없는 경우 기존의 필터링 조건 사용
     const start = filters.startDate ? new Date(filters.startDate) : null;
     const end = filters.endDate
       ? new Date(filters.endDate + "T23:59:59")
@@ -238,6 +282,7 @@ function ExpenseManager() {
     filters.filterCategory,
     filters.minAmount,
     filters.maxAmount,
+    debouncedSearchQuery,
   ]);
 
   const calculateTotals = useMemo(() => {
@@ -272,6 +317,9 @@ function ExpenseManager() {
     const storedSQ1 = localStorage.getItem("encryptedSecurityQuestion1") || "";
     const storedSQ2 = localStorage.getItem("encryptedSecurityQuestion2") || "";
     const taps = localStorage.getItem("taps") || "";
+    const expenseCategoryTabs =
+      localStorage.getItem("expenseCategoryTabs") || "";
+    const incomeHeaders = localStorage.getItem("incomeHeaders") || "";
 
     ipcRenderer.send("save-data", {
       expenseData,
@@ -280,6 +328,8 @@ function ExpenseManager() {
       storedSQ1,
       storedSQ2,
       taps,
+      expenseCategoryTabs,
+      incomeHeaders,
     });
   }, [expenseData, incomeData]);
 
@@ -344,7 +394,7 @@ function ExpenseManager() {
 
   useEffect(() => {
     const handleDataLoad = (event, data) => {
-      setShowPasswordModal(false); // 모달 닫기
+      setShowPasswordModal(false);
 
       if (data) {
         const {
@@ -354,6 +404,8 @@ function ExpenseManager() {
           // storedSQ1,
           // storedSQ2,
           taps,
+          expenseCategoryTabs,
+          incomeHeaders,
         } = data;
 
         if (taps) {
@@ -361,45 +413,21 @@ function ExpenseManager() {
           setTaps(JSON.parse(taps));
         }
 
-        sortByDate(expenseData, "on", setExpenseData);
+        if (expenseCategoryTabs) {
+          localStorage.setItem("expenseCategoryTabs", expenseCategoryTabs);
+          setExpenseCategoryTabs(JSON.parse(expenseCategoryTabs));
+        }
+
+        if (incomeHeaders) {
+          localStorage.setItem("incomeHeaders", incomeHeaders);
+          setIncomeHeaders(JSON.parse(incomeHeaders));
+        }
+
+        sortByDate(expenseData, setExpenseData, "ascending");
         setIncomeData(incomeData);
 
         // setDataInitialized(true);
         // setFileId(Date());
-        // const monthNamesToNumbers = {
-        //   January: "01",
-        //   February: "02",
-        //   March: "03",
-        //   April: "04",
-        //   May: "05",
-        //   June: "06",
-        //   July: "07",
-        //   August: "08",
-        //   September: "09",
-        //   October: "10",
-        //   November: "11",
-        //   December: "12",
-        // };
-
-        // const convertedData = expenseData.map((item) => {
-        //   const monthNumber = monthNamesToNumbers[item.month];
-        //   if (monthNumber) {
-        //     return { ...item, month: monthNumber };
-        //   }
-        //   return item;
-        // });
-
-        // setExpenseData(convertedData);
-
-        // const transformedData = expenseData.map(
-        //   ({ type, sort, categoryData, amountData, ...rest }) => ({
-        //     ...rest, // 기존의 다른 필드들은 그대로 유지
-        //     from: type, // 'type' 필드를 'from'으로 변경
-        //     category: sort, // 'sort' 필드를 'category'로 변경
-        //     item: categoryData, // 'categoryData'를 'item'으로 변경
-        //     amount: amountData, // 'amountData'를 'amount'으로 변경
-        //   })
-        // );
       }
     };
 
@@ -437,7 +465,7 @@ function ExpenseManager() {
       return;
     }
 
-    sortByDate(expenseData, "off", setExpenseData);
+    sortByDate(expenseData, setExpenseData, "ascending");
 
     const combinedData = {
       expenseData: expenseData.length > 0 ? expenseData : null,
@@ -457,7 +485,7 @@ function ExpenseManager() {
   useEffect(() => {
     ipcRenderer.on("excel-data", (event, expenseData, incomeData) => {
       if (expenseData && expenseData.length > 0) {
-        sortByDate(expenseData, "on", setExpenseData);
+        sortByDate(expenseData, setExpenseData, "ascending");
       }
 
       if (incomeData && incomeData.length > 0) {
@@ -489,43 +517,21 @@ function ExpenseManager() {
     };
   }, []);
 
-  //* SEARCH ITEM *//
-  // const filteredSearch = useMemo(() => {
-  //   return expenseData.filter(
-  //     (p) =>
-  //       p.categoryData
-  //         .replace(" ", "")
-  //         .toLocaleLowerCase()
-  //         .includes(searchInput.replace(" ", "").toLocaleLowerCase()) ||
-  //       p.sort
-  //         .replace(" ", "")
-  //         .toLocaleLowerCase()
-  //         .includes(searchInput.replace(" ", "").toLocaleLowerCase()) ||
-  //       p.type
-  //         .replace(" ", "")
-  //         .toLocaleLowerCase()
-  //         .includes(searchInput.replace(" ", "").toLocaleLowerCase())
-  //   );
-  // }, [searchInput, expenseData]);
-
-  // //* SEARCH ITEM TOTAL AMOUNT *//
-  // const filteredSearchTotal = handleTotalAmountCount(
-  //   filteredSearch,
-  //   "amount",
-  //   "yes"
-  // );
-
-  // //* SEARCH ITEM TOTAL COUNT *//
-  // const filteredSearchTotalCount = handleTotalAmountCount(
-  //   filteredSearch,
-  //   "count",
-  //   "yes"
-  // );
-
   const [currentPage, setCurrentPage] = useState(1);
   const [currentGroup, setCurrentGroup] = useState(1);
-  const itemsPerPage = 20;
+  const itemsPerPage = 10;
   const pagesPerGroup = 10; // 한 그룹당 표시할 페이지 수
+
+  const [newDataID, setNewDataID] = useState(-1);
+
+  useEffect(() => {
+    const newDataIndex = filteredData.findIndex(
+      (item) => item.id === newDataID
+    );
+
+    const newPageNumber = Math.ceil((newDataIndex + 1) / itemsPerPage);
+    setCurrentPage(newPageNumber);
+  }, [newDataID]);
 
   // 페이지네이션을 위한 계산
   const totalItems = filteredData.length;
@@ -609,18 +615,18 @@ function ExpenseManager() {
 
   useEffect(() => {
     if (isMounted.current) {
-      handleTableReset();
+      tablePageReset();
       setFilterOn(false);
-      handleFilterReset();
+      filterReset();
     } else {
       // 첫 마운트 시에는 이 블록이 실행되고, 그 후 isMounted.current 값을 true로 설정
       isMounted.current = true;
     }
-  }, [month, year, taps, activeIndex]);
+  }, [month, year, taps, activeIndex, viewMode, isIncomeView]);
 
   useEffect(() => {
     if (isMounted.current) {
-      handleTableReset();
+      tablePageReset();
     }
   }, [
     filters.filterCategory,
@@ -680,6 +686,69 @@ function ExpenseManager() {
     };
   }, [isDataInsert, isEditBtn]);
 
+  const [sortConfig, setSortConfig] = useState({
+    key: "date",
+    direction: "ascending",
+    type: "date",
+  });
+
+  const handleSort = (key, type) => {
+    let direction = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction, type });
+  };
+
+  const tableHeaders = [
+    { key: "date", label: "Date", type: "date" },
+    { key: "from", label: "From", type: "string" },
+    { key: "category", label: "Category", type: "string" },
+    { key: "item", label: "Item", type: "string" },
+    ...(taxOn ? [{ key: "tax", label: "Tax", type: "number" }] : []),
+    { key: "amount", label: "Amount", type: "number" },
+  ];
+
+  useEffect(() => {
+    if (sortConfig.type === "date") {
+      sortByDate(expenseData, setExpenseData, sortConfig.direction);
+    } else if (sortConfig.type === "string") {
+      sortStrings(
+        expenseData,
+        setExpenseData,
+        sortConfig.direction,
+        sortConfig.key
+      );
+    } else if (sortConfig.type === "number") {
+      sortNumbers(
+        expenseData,
+        setExpenseData,
+        sortConfig.direction,
+        sortConfig.key
+      );
+    }
+    // eslint-disable-next-line
+  }, [sortConfig]);
+
+  useEffect(() => {
+    setDebouncedSearchQuery("");
+    setSearchQuery("");
+  }, [viewMode, isIncomeView]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchQuery);
+    }, 500); // 300ms 지연
+
+    tablePageReset();
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [searchQuery]);
+
+  const isSearching = !!debouncedSearchQuery; // 검색 중인지 여부 판단
+
   return (
     <>
       <div className="app">
@@ -689,8 +758,7 @@ function ExpenseManager() {
             length={Object.keys(checkedItems).length}
             checkedItems={checkedItems}
             setCheckedItems={setCheckedItems}
-            expenseData={expenseData}
-            setExpenseData={setExpenseData}
+            expenseOrIncome="expense"
           />
         )}
 
@@ -715,30 +783,36 @@ function ExpenseManager() {
 
         {/* Main Header */}
         <section className="app-main-header">
-          <h1 className="header">
+          {/* <h1 className="header">
             Money Insight{" "}
             <FontAwesomeIcon icon="fa-solid fa-money-check-dollar" />
-          </h1>
-          <h3 className="sub-header">{storeName}</h3>
+          </h1> */}
+          <h1 className="header">Money Insight</h1>
         </section>
 
+        <SwitchManagers
+          setIncomeView={setIncomeView}
+          isIncomeView={isIncomeView}
+        />
+
         {/* Viewmode Navbar */}
-        <Navbar viewMode={viewMode} handleNavbarBtn={handleNavbarBtn} />
+        <Navbar
+          viewMode={viewMode}
+          handleNavbarBtn={handleNavbarBtn}
+          isIncomeView={isIncomeView}
+        />
 
         {/* Switch Managers, Date Selector, Data Insert */}
         {viewMode !== "Setting" && (
           <>
-            <SwitchManagers
-              setIncomeView={setIncomeView}
-              isIncomeView={isIncomeView}
-            />
-
-            <DateSelector
-              handleExpenseDate={handleExpenseDate}
-              date={date}
-              isAllChecked={isAllChecked}
-              handleAllChecked={handleAllChecked}
-            />
+            <div className={`${isSearching ? "hidden" : "visible"}`}>
+              <DateSelector
+                handleExpenseDate={handleExpenseDate}
+                date={date}
+                isMonthAllChecked={isMonthAllChecked}
+                handleMonthAllChecked={handleMonthAllChecked}
+              />
+            </div>
 
             <button
               className="item-insert-button"
@@ -753,131 +827,47 @@ function ExpenseManager() {
         {viewMode === "Table" && isIncomeView === "Expense" && (
           <div className="table-content-container animation">
             <div className="main-container">
-              <h2 className="main-header">
-                <span className="main-year">{year} </span>{" "}
-                {month === "All" ? "All" : monthName}
-              </h2>
+              {/* <HeaderDisplay
+                isSearching={isSearching}
+                month={month}
+                year={year}
+                monthName={monthName}
+              /> */}
 
-              <h2 className="main-sub-header">
-                {month === "All" ? "" : `(${Number(month)}월)`}
-              </h2>
-
-              <section className="top-tap-container">
+              <section
+                className={`top-tap-container ${
+                  isSearching ? "hidden" : "visible"
+                }`}
+              >
                 <DropdownTap
-                  taps={taps}
                   handleFromTap={handleFromTap}
                   activeIndex={activeIndex}
                 />
-              </section>
 
-              {totalPages > 0 && (
                 <div className="item-total-count-container">
                   <h3 className="item-count item-count-top">
                     {itemCount} items
                   </h3>
                   <h3 className="item-total item-total-top">
-                    Total: <span style={{ marginRight: "3px" }}>$</span>
-                    {parseFloat(total).toLocaleString("en-US")}
+                    Total:
+                    <span style={{ color: "#c6634a" }}>
+                      <span style={{ marginRight: "3px" }}> $</span>
+                      {parseFloat(total).toLocaleString("en-US")}
+                    </span>
                   </h3>
                 </div>
-              )}
+              </section>
 
-              <div className="item-search-filter-container">
-                <input type="search" placeholder="🔍 Search.."></input>
-                <button
-                  onClick={handleFilter}
-                  className={`item-filter-button ${
-                    isFilterOn ? "filter-active" : null
-                  }`}
-                >
-                  Filter
-                </button>
-              </div>
-
-              {isFilterOn && (
-                <div className="filters-container">
-                  <form className="filters animation-x">
-                    <div className="filters-input-container">
-                      <label htmlFor="filter-category">Category</label>
-                      <select
-                        value={filters.filterCategory}
-                        onChange={(e) =>
-                          updateFilter("filterCategory", e.target.value)
-                        }
-                        id="filter-category"
-                      >
-                        <option value="All">모든 카테고리</option>
-                        {foodSortList.map((item, index) => {
-                          return (
-                            <option value={item.name} key={index}>
-                              {item.name}
-                            </option>
-                          );
-                        })}
-                      </select>
-                    </div>
-
-                    <div className="filters-input-container">
-                      <label>Minimum Amount</label>
-                      <input
-                        type="number"
-                        placeholder="최소 금액"
-                        value={filters.minAmount}
-                        onChange={(e) =>
-                          updateFilter("minAmount", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="filters-input-container">
-                      <label>Maximum Amount</label>
-                      <input
-                        type="number"
-                        placeholder="최대 금액"
-                        value={filters.maxAmount}
-                        onChange={(e) =>
-                          updateFilter("maxAmount", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="filters-input-container">
-                      <label>Start Date</label>
-                      <input
-                        type="date"
-                        value={filters.startDate}
-                        onChange={(e) =>
-                          updateFilter("startDate", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="filters-input-container">
-                      <label>End Date</label>
-                      <input
-                        type="date"
-                        value={filters.endDate}
-                        onChange={(e) =>
-                          updateFilter("endDate", e.target.value)
-                        }
-                      />
-                    </div>
-
-                    <div className="filters-input-container">
-                      <label>Reset</label>
-                      <button type="reset" onClick={handleFilterReset}>
-                        Reset
-                      </button>
-                    </div>
-                  </form>
-
-                  <center className="animation-x">
-                    <button className="filters-close" onClick={handleFilter}>
-                      CLOSE
-                    </button>
-                  </center>
-                </div>
-              )}
+              <SearchAndFilter
+                isSearching={isSearching}
+                setSearchQuery={setSearchQuery}
+                handleFilter={handleFilter}
+                isFilterOn={isFilterOn}
+                filters={filters}
+                updateFilter={updateFilter}
+                filterReset={filterReset}
+                expenseCategoryTabs={expenseCategoryTabs}
+              />
 
               <table ref={tableRef}>
                 <thead>
@@ -890,13 +880,22 @@ function ExpenseManager() {
                         disabled={disableTableChecked}
                       />
                     </th>
-                    <th>#</th>
-                    <th>Date</th>
-                    <th>From</th>
-                    <th>Category</th>
-                    <th>Name</th>
-                    {taxOn && <th>Tax</th>}
-                    <th>Amount</th>
+                    <th># </th>
+                    {tableHeaders.map(({ key, label, type }) => (
+                      <th key={key} onClick={() => handleSort(key, type)}>
+                        {label}{" "}
+                        {sortConfig.key === key && (
+                          <FontAwesomeIcon
+                            icon={
+                              sortConfig.direction === "ascending"
+                                ? "fa-solid fa-arrow-up"
+                                : "fa-solid fa-arrow-down"
+                            }
+                            style={{ width: "9px" }}
+                          />
+                        )}
+                      </th>
+                    ))}
                     <th>Edit</th>
                   </tr>
                 </thead>
@@ -1002,24 +1001,29 @@ function ExpenseManager() {
 
               <PageInfo totalPages={totalPages} currentPage={currentPage} />
 
-              <div className="item-total-container">
-                <div className="item-total-count-container">
-                  <h3 className="item-count item-count-bottom">
-                    {itemCount} items
-                  </h3>
-                  {taxOn && (
-                    <h2 className="item-total item-total-tax">
-                      Total Tax: <span style={{ marginRight: "5px" }}>$</span>
-                      {parseFloat(totalTax).toLocaleString("en-US")}
+              {currentItems.length > 0 && (
+                <div className="item-total-container">
+                  <div className="item-total-count-container">
+                    <h3 className="item-count item-count-bottom">
+                      {itemCount} items
+                    </h3>
+                    {taxOn && (
+                      <h2 className="item-total item-total-tax">
+                        Total Expense Tax:{" "}
+                        <span style={{ marginRight: "5px" }}>$</span>
+                        {parseFloat(totalTax).toLocaleString("en-US")}
+                      </h2>
+                    )}
+                    <h2 className="item-total">
+                      Total Amount:{" "}
+                      <span style={{ color: "#c6634a" }}>
+                        <span style={{ marginRight: "5px" }}>$</span>
+                        {parseFloat(total).toLocaleString("en-US")}
+                      </span>
                     </h2>
-                  )}
-                  <h2 className="item-total">
-                    Total Amount: <span style={{ marginRight: "5px" }}>$</span>
-                    {parseFloat(total).toLocaleString("en-US")}
-                  </h2>
+                  </div>
                 </div>
-              </div>
-
+              )}
               <section className="item-export-btn-container">
                 <button onClick={selectExcelFile} className="item-export-btn">
                   Import Excel file (엑셀을 불러오기)
@@ -1044,17 +1048,14 @@ function ExpenseManager() {
         )}
 
         {viewMode === "Table" && isIncomeView === "Income" && (
-          <IncomeManager incomeData={incomeData} />
+          <IncomeManager year={year} month={month} />
         )}
 
         {/* Viewmode = settings */}
         {viewMode === "Setting" && (
           <Setting
-            taps={taps}
-            setTaps={setTaps}
             taxOn={taxOn}
             handleSettingTax={handleSettingTax}
-            expenseDataLength={expenseData.length}
             setDeleteBtnClick={setDeleteBtnClick}
           />
         )}
@@ -1062,11 +1063,10 @@ function ExpenseManager() {
         {/* Viewmode = dashboard */}
         {viewMode === "Dashboard" && (
           <ExpenseDashboard
-            expenseData={expenseData}
             selectedYear={year.toString()}
             selectedMonth={month}
-            itemCount={itemCount}
-            total={total}
+            // itemCount={itemCount}
+            // total={total}
             isIncomeView={isIncomeView}
           />
         )}
@@ -1080,10 +1080,8 @@ function ExpenseManager() {
           date={date}
           year={year}
           month={month}
-          expenseData={expenseData}
-          setExpenseData={setExpenseData}
-          taps={taps}
           taxOn={taxOn}
+          setNewDataID={setNewDataID}
         />
       )}
 
@@ -1092,20 +1090,13 @@ function ExpenseManager() {
         <DataEditModal
           setEditBtn={setEditBtn}
           editIndex={editIndex}
-          setExpenseData={setExpenseData}
-          expenseData={expenseData}
-          taps={taps}
           taxOn={taxOn}
         />
       )}
 
       {/* Delete All Data Modal */}
       {isDeleteBtnClick && (
-        <DeleteAllModal
-          setDeleteBtnClick={setDeleteBtnClick}
-          expenseData={expenseData}
-          setExpenseData={setExpenseData}
-        />
+        <DeleteAllModal setDeleteBtnClick={setDeleteBtnClick} />
       )}
 
       {showPasswordModal && (

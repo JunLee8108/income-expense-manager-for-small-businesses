@@ -4,9 +4,13 @@ import AlertModal from "../../component/common/modal/AlertModal";
 import InputModal from "../../component/common/modal/InputModal";
 import Loading from "../../component/common/Loading";
 import ForgotPassword from "./component/ForgotPassword";
+import { foodSortList } from "../../component/util/data";
 
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { useRecoilValue } from "recoil";
+import { incomeHeadersState } from "../../recoil/store";
 
 const { ipcRenderer } = window.require("electron");
 
@@ -30,10 +34,24 @@ export default function Landing() {
     useState(false);
   const [isForgotPassword, setForgotPassword] = useState(false);
   const [capsLockWarning, setCapsLockWarning] = useState(false);
+  const [capsLockWarningRepeatPassword, setCapsLockWarningRepeatPassword] =
+    useState(false);
+
+  const defaultIncomeHeaders = [
+    { key: "date", label: "Date", type: "date", role: "None" },
+    { key: "source", label: "Source", type: "text", role: "None" },
+    { key: "netincome", label: "Net Income", type: "number", role: "+" },
+    { key: "tax", label: "Tax", type: "number", role: "+" },
+    { key: "servicefee", label: "Service Fee", type: "number", role: "-" },
+    { key: "total", label: "Total", type: "number", role: "None" },
+  ];
 
   const setLocalStorageAndNavigate = () => {
     localStorage.clear();
     localStorage.setItem("storeName", storeName);
+    localStorage.setItem("expenseCategoryTabs", JSON.stringify(foodSortList));
+    localStorage.setItem("taps", JSON.stringify(["Overview"]));
+    localStorage.setItem("incomeHeaders", JSON.stringify(defaultIncomeHeaders));
     localStorage.setItem("encryptedPassword", encryptedPassword);
     localStorage.setItem("encryptedSecurityQuestion1", securityQuestion1);
     localStorage.setItem("encryptedSecurityQuestion2", securityQuestion2);
@@ -67,10 +85,16 @@ export default function Landing() {
 
     const form = new FormData(e.currentTarget);
 
-    const storeName = form.get("storeName");
+    const storeName = form.get("storeName").trim();
     const password = form.get("password").trim();
+    const repeatPassword = form.get("repeatPassword").trim();
     const sq1 = form.get("securityQuestion1").trim();
     const sq2 = form.get("securityQuestion2").trim();
+
+    if (password !== repeatPassword) {
+      setAlertMessage("The passwords do not match.");
+      setAlertModal(true);
+    }
 
     setStoreName(storeName);
 
@@ -116,6 +140,11 @@ export default function Landing() {
     setCapsLockWarning(isCapsLockOn);
   };
 
+  const handleKeyPressRepeatPassword = (e) => {
+    const isCapsLockOn = e.getModifierState("CapsLock");
+    setCapsLockWarningRepeatPassword(isCapsLockOn);
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
       e.target.blur();
@@ -147,7 +176,17 @@ export default function Landing() {
     <>
       <div className="landing-bg display-flex-center">
         <div className="landing-container animation">
-          <h1 className="landing-title">Money Insight</h1>
+          {isNewData ? (
+            <h1 className="landing-title">Create Your Account 👋</h1>
+          ) : isForgotPassword ? (
+            <h1 className="landing-title">Reset Your Password 🔓</h1>
+          ) : (
+            <h1 className="landing-title">Money Insight</h1>
+          )}
+
+          {/* {!isNewData && isForgotPassword && (
+            <h1 className="landing-title">Create Your Accountasd 👋</h1>
+          )} */}
 
           {!isNewData && !isForgotPassword && (
             <>
@@ -233,6 +272,28 @@ export default function Landing() {
                   required
                 ></input>
 
+                {capsLockWarning && (
+                  <p className="caps-lock-warning caps-lock-warning-register">
+                    * Caps Lock is ON
+                  </p>
+                )}
+
+                <label htmlFor="repeatPassword">🚀 Repeat Password</label>
+                <input
+                  type="password"
+                  placeholder="Repeat Password"
+                  name="repeatPassword"
+                  id="repeatPassword"
+                  onKeyUp={handleKeyPressRepeatPassword}
+                  required
+                ></input>
+
+                {capsLockWarningRepeatPassword && (
+                  <p className="caps-lock-warning caps-lock-warning-register">
+                    * Caps Lock is ON
+                  </p>
+                )}
+
                 <label htmlFor="securityQuestion1">
                   🚀 Security Question 1
                 </label>
@@ -257,11 +318,6 @@ export default function Landing() {
                   required
                 ></input>
 
-                {capsLockWarning && (
-                  <p className="caps-lock-warning caps-lock-warning-register">
-                    * Caps Lock is ON
-                  </p>
-                )}
                 <button type="submit" className="landing-new-container-start">
                   START
                 </button>

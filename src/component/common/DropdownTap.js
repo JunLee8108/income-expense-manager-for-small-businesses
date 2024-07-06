@@ -2,9 +2,14 @@ import "./DropdownMenu.css";
 
 import useBodyScrollLock from "./useBodyScrollLock";
 
+import { useRecoilValue } from "recoil";
+import { tapsState } from "../../recoil/store";
+
 import { useState, useEffect, useRef } from "react";
 
-function DropdownTap({ taps, handleFromTap, activeIndex }) {
+function DropdownTap({ handleFromTap, activeIndex }) {
+  const taps = useRecoilValue(tapsState);
+
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTap, setSelectedTap] = useState(taps[activeIndex]);
   const dropdownRef = useRef(null);

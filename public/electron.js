@@ -305,7 +305,16 @@ ipcMain.on(
   "save-data",
   (
     event,
-    { expenseData, incomeData, storedPassword, storedSQ1, storedSQ2, taps }
+    {
+      expenseData,
+      incomeData,
+      storedPassword,
+      storedSQ1,
+      storedSQ2,
+      taps,
+      expenseCategoryTabs,
+      incomeHeaders,
+    }
   ) => {
     dialog
       .showSaveDialog({
@@ -323,6 +332,8 @@ ipcMain.on(
             storedSQ1,
             storedSQ2,
             taps,
+            expenseCategoryTabs,
+            incomeHeaders,
           };
 
           // fs.writeFileSync(

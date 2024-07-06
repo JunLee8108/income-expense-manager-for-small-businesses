@@ -1,16 +1,19 @@
-@import url("https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap");
+/* @import url("https://fonts.googleapis.com/css2?family=Reddit+Mono:wght@200..900&display=swap"); */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&display=swap");
 
 /* @import url("https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap"); */
 
 body {
   margin: 0;
-  font-family: "Reddit Mono", monospace;
+  font-family: "Noto Sans", sans-serif;
   /* font-family: "Inter", sans-serif; */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  /* background-color: snow;
-  color: #212121; */
-  background-color: #212121;
+  /* background-color: snow; */
+  /* color: #212121; */
+  background-color: #202020;
+  /* background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%); */
+  /* background: linear-gradient(109.6deg, #f5eff9 30.1%, #cfd3ec 100.2%); */
   color: white;
 }
 
@@ -23,6 +26,18 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+.hidden {
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.1s ease;
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: auto;
+  transition: all 0.1s ease;
 }
 
 ::-webkit-scrollbar {

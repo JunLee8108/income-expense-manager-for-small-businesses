@@ -1,7 +1,6 @@
 import "../../App.css";
 
 import { Fragment, useState, useEffect } from "react";
-import { foodSortList } from "../util/data";
 import { generateRandomID } from "../util/assignID";
 import { isIDUnique } from "../util/assignID";
 import usePad from "./hooks/usePad";
@@ -9,19 +8,28 @@ import { useSortByDate } from "./useSortByDate";
 import AlertModal from "./modal/AlertModal";
 import IncomeInsertModal from "./IncomeInsertModal";
 
+import { useRecoilValue, useRecoilState } from "recoil";
+import {
+  tapsState,
+  expenseCategoryTabsState,
+  expenseDataState,
+} from "../../recoil/store";
+
 export default function DataInsertModal({
   setDataInsert,
   activeIndex,
   date,
   year,
   month,
-  expenseData,
-  setExpenseData,
-  taps,
   taxOn,
+  setNewDataID,
 }) {
   const pad = usePad();
   const sortBydate = useSortByDate();
+  const taps = useRecoilValue(tapsState);
+  const expenseCategoryTabs = useRecoilValue(expenseCategoryTabsState);
+
+  const [expenseData, setExpenseData] = useRecoilState(expenseDataState);
 
   const [IsIncomeOrExpense, setIncomeOrExpense] = useState("");
   const [itemInput, setItemInput] = useState("");
@@ -81,7 +89,8 @@ export default function DataInsertModal({
       id: uniqueID,
     };
 
-    sortBydate([...expenseData, data], "on", setExpenseData);
+    sortBydate([...expenseData, data], setExpenseData, "ascending");
+    setNewDataID(data.id);
     setDataInsert(false);
   };
 
@@ -146,7 +155,11 @@ export default function DataInsertModal({
         )}
 
         {IsIncomeOrExpense === "income" && (
-          <IncomeInsertModal setDataInsert={setDataInsert} month={month} />
+          <IncomeInsertModal
+            setDataInsert={setDataInsert}
+            date={date}
+            sortBydate={sortBydate}
+          />
         )}
 
         {IsIncomeOrExpense === "expense" && (
@@ -234,10 +247,10 @@ export default function DataInsertModal({
                 <option value="" disabled>
                   Please Choose...
                 </option>
-                {foodSortList.map((content, index) => {
+                {expenseCategoryTabs.map((content, index) => {
                   return (
                     <Fragment key={index}>
-                      <option>{content.name}</option>
+                      <option>{content}</option>
                     </Fragment>
                   );
                 })}
@@ -306,6 +319,20 @@ export default function DataInsertModal({
                 required
               ></input>
             </div>
+
+            {/* <div className="item-input-box">
+              <label htmlFor="quantity">* Quantity (수량)</label>
+              <input
+                className="item-input"
+                id="quantity"
+                placeholder="1"
+                defaultValue={1}
+                name="quantity"
+                type="number"
+                min={1}
+                required
+              ></input>
+            </div> */}
 
             <button type="submit" className="item-input-submit">
               SUBMIT

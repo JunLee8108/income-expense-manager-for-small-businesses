@@ -1,21 +1,24 @@
 import "../../App.css";
-import { foodSortList } from "../util/data";
+
 import usePad from "./hooks/usePad";
 import { useSortByDate } from "./useSortByDate";
 import AlertModal from "./modal/AlertModal";
 
+import { useRecoilValue, useRecoilState } from "recoil";
+import {
+  tapsState,
+  expenseCategoryTabsState,
+  expenseDataState,
+} from "../../recoil/store";
+
 import { Fragment, useState, useEffect, useRef } from "react";
 
-export default function DataEditModal({
-  setEditBtn,
-  editIndex,
-  setExpenseData,
-  expenseData,
-  taps,
-  taxOn,
-}) {
+export default function DataEditModal({ setEditBtn, editIndex, taxOn }) {
   const sortByDate = useSortByDate();
   const pad = usePad();
+  const taps = useRecoilValue(tapsState);
+  const expenseCategoryTabs = useRecoilValue(expenseCategoryTabsState);
+  const [expenseData, setExpenseData] = useRecoilState(expenseDataState);
 
   const editData = expenseData.filter((data) => data.id === editIndex);
 
@@ -98,7 +101,7 @@ export default function DataEditModal({
 
     // DATA SORT
     if (updatedExpenseData.length > 1) {
-      sortByDate(updatedExpenseData, "on", setExpenseData);
+      sortByDate(updatedExpenseData, setExpenseData, "ascending");
     } else {
       setExpenseData(updatedExpenseData);
     }
@@ -214,10 +217,10 @@ export default function DataEditModal({
               <option value="" disabled>
                 Please Choose...
               </option>
-              {foodSortList.map((content, index) => {
+              {expenseCategoryTabs.map((content, index) => {
                 return (
                   <Fragment key={index}>
-                    <option>{content.name}</option>
+                    <option>{content}</option>
                   </Fragment>
                 );
               })}

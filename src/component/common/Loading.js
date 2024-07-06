@@ -7,7 +7,7 @@ export default function Loading() {
     <>
       <div className="loading-container-bg">
         <div className="loading-container">
-          <HashLoader color="#55c6aa" />
+          <HashLoader color="#3b853b" />
         </div>
       </div>
     </>

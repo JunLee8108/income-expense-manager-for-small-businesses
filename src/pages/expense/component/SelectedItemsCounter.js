@@ -3,14 +3,18 @@ import YesNoModal from "../../../component/common/modal/YesNoModal";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
+import { useRecoilState } from "recoil";
+import { expenseDataState, incomeDataState } from "../../../recoil/store";
 
 export default function SelectedItemsCounter({
   length,
   checkedItems,
   setCheckedItems,
-  expenseData,
-  setExpenseData,
+  expenseOrIncome,
 }) {
+  const [expenseData, setExpenseData] = useRecoilState(expenseDataState);
+  const [incomeData, setIncomeData] = useRecoilState(incomeDataState);
+
   const [isConfirmModal, setConfirmModal] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -20,8 +24,15 @@ export default function SelectedItemsCounter({
   };
 
   const handleOnConfirm = () => {
-    const copy = [...expenseData].filter((item) => !checkedItems[item.id]);
-    setExpenseData(copy);
+    if (expenseOrIncome === "expense") {
+      const copy = [...expenseData].filter((item) => !checkedItems[item.id]);
+      setExpenseData(copy);
+    } else {
+      const copy = [...incomeData].filter((item) => !checkedItems[item.id]);
+      setIncomeData(copy);
+    }
+
+    setCheckedItems({});
   };
 
   return (

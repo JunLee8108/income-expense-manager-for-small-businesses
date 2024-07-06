@@ -1,78 +1,85 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 const foodSortList = [
-  {
-    id: 0,
-    name: "Meat (육류)",
-  },
-  {
-    id: 1,
-    name: "Fruit (과일류)",
-  },
-  {
-    id: 2,
-    name: "Vegetable (채소류)",
-  },
-  {
-    id: 3,
-    name: "Sea Food (해산물)",
-  },
-  {
-    id: 4,
-    name: "Dairy (유제품)",
-  },
-  {
-    id: 5,
-    name: "Frozen Food (냉동식품)",
-  },
-  {
-    id: 9,
-    name: "Beverages (음료)",
-  },
-  {
-    id: 9,
-    name: "Processed Food (가공식품)",
-  },
-  {
-    id: 10,
-    name: "Condiment (케찹/소스/기름)",
-  },
-  {
-    id: 10,
-    name: "Baking & Spice (밀가루/설탕/소금)",
-  },
-  {
-    id: 10,
-    name: "Bread & Grain (빵/쌀)",
-  },
-  {
-    id: 10,
-    name: "Canned Goods (캔 식품)",
-  },
-  {
-    id: 10,
-    name: "Food Court (푸드코트)",
-  },
-  {
-    id: 11,
-    name: "Paper & Plastic (종이/플라스틱)",
-  },
-  {
-    id: 11,
-    name: "Tax (세금)",
-  },
-  {
-    id: 11,
-    name: "Wage (급여)",
-  },
-  {
-    id: 12,
-    name: "Operational Expense (운영비용)",
-  },
-  {
-    id: 13,
-    name: "Others (기타)",
-  },
+  // {
+  //   id: 0,
+  //   name: "Meat (육류)",
+  // },
+  // {
+  //   id: 1,
+  //   name: "Fruit (과일류)",
+  // },
+  // {
+  //   id: 2,
+  //   name: "Vegetable (채소류)",
+  // },
+  // {
+  //   id: 3,
+  //   name: "Sea Food (해산물)",
+  // },
+  // {
+  //   id: 4,
+  //   name: "Dairy (유제품)",
+  // },
+  // {
+  //   id: 5,
+  //   name: "Frozen Food (냉동식품)",
+  // },
+  // {
+  //   id: 9,
+  //   name: "Beverages (음료)",
+  // },
+  // {
+  //   id: 9,
+  //   name: "Processed Food (가공식품)",
+  // },
+  // {
+  //   id: 10,
+  //   name: "Condiment (케찹/소스/기름)",
+  // },
+  // {
+  //   id: 10,
+  //   name: "Baking & Spice (밀가루/설탕/소금)",
+  // },
+  // {
+  //   id: 10,
+  //   name: "Bread & Grain (빵/쌀)",
+  // },
+  // {
+  //   id: 10,
+  //   name: "Canned Goods (캔 식품)",
+  // },
+  // {
+  //   id: 10,
+  //   name: "Food Court (푸드코트)",
+  // },
+  // {
+  //   id: 11,
+  //   name: "Paper & Plastic (종이/플라스틱)",
+  // },
+  // {
+  //   id: 11,
+  //   name: "Tax (세금)",
+  // },
+  // {
+  //   id: 11,
+  //   name: "Wage (급여)",
+  // },
+  // {
+  //   id: 12,
+  //   name: "Operational Expense (운영비용)",
+  // },
+  // {
+  //   id: 13,
+  //   name: "Others (기타)",
+  // },
+  "Housing (주거)",
+  "Salary (급여)",
+  "Utilities (공과금)",
+  "Personal (개인)",
+  "Food (식품)",
+  "Transportation (교통)",
+  "Other (기타)",
 ];
 
 const topTabList = [

@@ -1,11 +1,11 @@
 import { incomeTopTabList } from "../util/data";
 
-export default function IncomeEditModal({
-  setDataEdit,
-  editDataID,
-  incomeData,
-  setIncomeData,
-}) {
+import { useRecoilState } from "recoil";
+import { incomeDataState } from "../../recoil/store";
+
+export default function IncomeEditModal({ setDataEdit, editDataID }) {
+  const [incomeData, setIncomeData] = useRecoilState(incomeDataState);
+
   const editItem = [...incomeData].find((item) => item.id === editDataID);
 
   const handleBg = (e) => {

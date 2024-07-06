@@ -2,6 +2,10 @@
   height: 100vh;
 }
 
+.landing-bg label {
+  font-size: 1.1rem;
+}
+
 .landing-container {
   text-align: center;
   display: flex;
@@ -55,21 +59,21 @@
   cursor: pointer;
   /* color: black; */
   /* border: 2px solid green; */
-  background-color: var(--mint);
+  background-color: #3b853b;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5);
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.8);
 }
 
 .landing-password-new:hover,
 .landing-password-current:hover {
-  background-color: var(--mintHover);
+  background-color: #27a927;
   color: white;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4);
 }
 
 .landing-forgot-password {
-  color: rgb(225, 170, 67);
+  color: rgb(205, 145, 34);
   text-decoration: underline 2px;
   text-underline-offset: 0.8rem;
   margin-bottom: 20px;
@@ -81,7 +85,7 @@
 }
 
 .landing-forgot-password:hover {
-  color: orange;
+  color: rgb(244, 161, 8);
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
@@ -112,7 +116,7 @@
 }
 
 .landing-new-container input {
-  padding: 15px 18px;
+  padding: 15px 19px;
   font-size: 15px;
   border-radius: 5px;
   border: 1px solid black;
