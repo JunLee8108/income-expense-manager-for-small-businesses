@@ -8,7 +8,7 @@ import useAutoSaveData from "../../component/common/useAutoSaveData";
 import useMonthName from "../../component/common/useMonthName";
 
 // Recoil
-import { useRecoilState, useRecoilValue } from "recoil";
+import { useRecoilState } from "recoil";
 import {
   tapsState,
   expenseCategoryTabsState,
@@ -308,8 +308,8 @@ function ExpenseManager() {
   //* ITEM TOTAL COUNT FOR MAIN CONTENT *//
   const itemCount = calculateTotals.count;
 
-  const [dataInitialized, setDataInitialized] = useState(false);
-  const [fileId, setFileId] = useState("");
+  // const [dataInitialized, setDataInitialized] = useState(false);
+  // const [fileId, setFileId] = useState("");
 
   //* SAVE DATA AS A JSON FILE *//
   const saveDataToFile = useCallback(() => {
@@ -346,7 +346,7 @@ function ExpenseManager() {
   useEffect(() => {
     const handleDataSaved = (event, data) => {
       if (data === "success") {
-        setDataInitialized(true);
+        // setDataInitialized(true);
         // setFileId(Date());
       }
     };
@@ -531,6 +531,7 @@ function ExpenseManager() {
 
     const newPageNumber = Math.ceil((newDataIndex + 1) / itemsPerPage);
     setCurrentPage(newPageNumber);
+    // eslint-disable-next-line
   }, [newDataID]);
 
   // 페이지네이션을 위한 계산
@@ -783,10 +784,6 @@ function ExpenseManager() {
 
         {/* Main Header */}
         <section className="app-main-header">
-          {/* <h1 className="header">
-            Money Insight{" "}
-            <FontAwesomeIcon icon="fa-solid fa-money-check-dollar" />
-          </h1> */}
           <h1 className="header">Money Insight</h1>
         </section>
 
@@ -795,7 +792,6 @@ function ExpenseManager() {
           isIncomeView={isIncomeView}
         />
 
-        {/* Viewmode Navbar */}
         <Navbar
           viewMode={viewMode}
           handleNavbarBtn={handleNavbarBtn}
@@ -827,12 +823,12 @@ function ExpenseManager() {
         {viewMode === "Table" && isIncomeView === "Expense" && (
           <div className="table-content-container animation">
             <div className="main-container">
-              {/* <HeaderDisplay
+              <HeaderDisplay
                 isSearching={isSearching}
                 month={month}
                 year={year}
                 monthName={monthName}
-              /> */}
+              />
 
               <section
                 className={`top-tap-container ${
