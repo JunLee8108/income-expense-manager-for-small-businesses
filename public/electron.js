@@ -15,6 +15,8 @@ const XLSX = require("xlsx");
 const crypto = require("crypto");
 const algorithm = "aes-256-cbc";
 
+const encryptionKey = "thisis32bytepleaseIdontknowthisa";
+
 require("dotenv").config();
 
 function createWindow() {
@@ -248,7 +250,8 @@ function encrypt(text) {
   let iv = crypto.randomBytes(16);
   let cipher = crypto.createCipheriv(
     algorithm,
-    Buffer.from(process.env.REACT_APP_ENCRYPTION_KEY),
+    //TODO
+    Buffer.from(encryptionKey),
     iv
   );
   let encrypted = cipher.update(text);
@@ -263,7 +266,8 @@ function decrypt(text) {
   let encryptedText = Buffer.from(parts.join(":"), "hex");
   let decipher = crypto.createDecipheriv(
     algorithm,
-    Buffer.from(process.env.REACT_APP_ENCRYPTION_KEY),
+    //TODO
+    Buffer.from(encryptionKey),
     iv
   );
   let decrypted = decipher.update(encryptedText);

@@ -254,9 +254,9 @@
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
 }
 
-.bar-container-modal {
-  height: 100%;
-}
+/* .bar-container-modal {
+  height: 800px;
+} */
 
 .dashboard-chart-header,
 .dashboard-chart-subheader {

@@ -4,6 +4,8 @@ import { yearList } from "../util/data";
 import { useRecoilState } from "recoil";
 import { expenseDataState } from "../../recoil/store";
 
+const encryptionKey = "thisis32bytepleaseIdontknowthisa";
+
 export default function DeleteAllModal({ setDeleteBtnClick }) {
   const { ipcRenderer } = window.require("electron");
 
@@ -17,7 +19,8 @@ export default function DeleteAllModal({ setDeleteBtnClick }) {
       body[key] = value;
     }
 
-    if (body.passcode === process.env.REACT_APP_HANARA) {
+    //TODO
+    if (body.passcode === encryptionKey) {
       handleDeleteAllBtn(body.year);
     } else {
       ipcRenderer.send(

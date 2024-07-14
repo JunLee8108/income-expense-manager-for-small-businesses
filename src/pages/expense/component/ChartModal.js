@@ -43,7 +43,11 @@ export default function ChartModal({
           onClick={closeModal}
         >
           <h3 className="dashboard-chart-subheader">{modalHeader}</h3>
-          <Bar data={propsChartData} options={chartOptions} />
+          <Bar
+            data={propsChartData}
+            options={chartOptions}
+            // style={{ width: "100%", height: "10%" }}
+          />
         </div>
       </div>
     </>
