@@ -785,6 +785,7 @@ function ExpenseManager() {
         {/* Main Header */}
         <section className="app-main-header">
           <h1 className="header">Money Insight</h1>
+          <h1 className="sub-header">{storeName}</h1>
         </section>
 
         <SwitchManagers

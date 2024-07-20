@@ -38,10 +38,7 @@ export default function ChartModal({
   return (
     <>
       <div className="chart-modal-bg flash">
-        <div
-          className="dashboard-bar-container bar-container-modal"
-          onClick={closeModal}
-        >
+        <div className="bar-container-modal" onClick={closeModal}>
           <h3 className="dashboard-chart-subheader">{modalHeader}</h3>
           <Bar
             data={propsChartData}

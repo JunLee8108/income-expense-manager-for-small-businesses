@@ -30,14 +30,15 @@
 
 .header {
   margin-top: 5rem;
-  margin-bottom: 5rem;
+  /* margin-bottom: 5rem; */
   font-size: 2.5rem;
   /* margin-bottom: 0; */
 }
 
 .sub-header {
-  color: grey;
+  color: rgb(175, 174, 174);
   margin-top: 0;
+  margin-bottom: 3rem;
   padding: 20px;
   /* border-bottom: black 1px dotted; */
 }

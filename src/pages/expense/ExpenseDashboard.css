@@ -254,9 +254,18 @@
   box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.5);
 }
 
-/* .bar-container-modal {
-  height: 800px;
-} */
+.bar-container-modal {
+  width: 100%;
+  height: 80%;
+  padding: 30px;
+  box-sizing: border-box;
+  box-shadow: none;
+  background-color: transparent;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
 
 .dashboard-chart-header,
 .dashboard-chart-subheader {

@@ -142,8 +142,8 @@ function createWindow() {
       label: "View",
       submenu: [
         // TODO
-        { role: "reload" },
-        { role: "forceReload" },
+        // { role: "reload" },
+        // { role: "forceReload" },
         { role: "toggleDevTools" },
         { type: "separator" },
         { role: "resetZoom" },
